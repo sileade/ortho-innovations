@@ -4,6 +4,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 import * as db from "./db";
+import { getPatientRehabEvents, generateICSFeed, getCalendarSubscriptionURL } from "./calendar-feed";
 
 export const appRouter = router({
   system: systemRouter,
@@ -148,6 +149,27 @@ export const appRouter = router({
   achievements: router({
     getAll: protectedProcedure.query(async ({ ctx }) => {
       return db.getAchievements(ctx.user.id);
+    }),
+  }),
+
+  // Calendar subscription
+  calendar: router({
+    getSubscriptionUrls: protectedProcedure.query(async ({ ctx }) => {
+      const patient = await db.getPatientByUserId(ctx.user.id);
+      if (!patient) return null;
+      
+      // Generate a simple token based on user ID (in production, use proper JWT)
+      const token = Buffer.from(`${ctx.user.id}:${patient.id}`).toString('base64');
+      const baseUrl = process.env.VITE_APP_URL || 'https://orthoinnovations.ae';
+      
+      return getCalendarSubscriptionURL(baseUrl, patient.id, token);
+    }),
+    
+    getEvents: protectedProcedure.query(async ({ ctx }) => {
+      const patient = await db.getPatientByUserId(ctx.user.id);
+      if (!patient) return [];
+      
+      return getPatientRehabEvents(patient.id);
     }),
   }),
 

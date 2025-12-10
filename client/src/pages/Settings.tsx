@@ -3,7 +3,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { Bell, Moon, Globe, Lock, HelpCircle, FileText, LogOut, ChevronRight, Mail, Smartphone, Dumbbell, Megaphone, Shield, Key } from "lucide-react";
+import { CalendarSync } from "@/components/CalendarSync";
+import { Bell, Moon, Globe, Lock, HelpCircle, FileText, LogOut, ChevronRight, Mail, Smartphone, Dumbbell, Megaphone, Shield, Key, Calendar } from "lucide-react";
 
 export default function Settings() {
   const { t, language, setLanguage } = useLanguage();
@@ -114,6 +115,43 @@ export default function Settings() {
                   </button>
                 </div>
               </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Calendar Sync */}
+        <Card className="border-none shadow-sm">
+          <CardContent className="p-4 lg:p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Calendar className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="font-bold">{language === 'ru' ? 'Синхронизация календаря' : 'Calendar Sync'}</h2>
+                <p className="text-sm text-muted-foreground">
+                  {language === 'ru' 
+                    ? 'Автоматическое обновление при изменении расписания' 
+                    : 'Auto-update when schedule changes'}
+                </p>
+              </div>
+            </div>
+            <div className="pl-13">
+              <CalendarSync>
+                <button className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-muted transition-colors">
+                  <div className="flex items-center gap-3">
+                    <Calendar className="w-5 h-5 text-muted-foreground" />
+                    <div className="text-left">
+                      <p className="font-medium text-sm">
+                        {language === 'ru' ? 'Подписаться на календарь' : 'Subscribe to Calendar'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {language === 'ru' ? 'Google, Apple, Outlook' : 'Google, Apple, Outlook'}
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                </button>
+              </CalendarSync>
             </div>
           </CardContent>
         </Card>

@@ -93,3 +93,11 @@
 - [x] Back button with proper navigation
 - [x] Swipe gesture navigation (iPhone-style)
 - [x] Profile summary popup on profile button click
+
+## Calendar Auto-Sync
+- [x] ICS calendar feed generation for rehabilitation schedule
+- [x] Calendar subscription URL endpoint (webcal://)
+- [x] Google Calendar subscription integration
+- [x] Apple Calendar subscription integration
+- [x] Auto-update when schedule changes (hourly refresh)
+- [x] UI for subscribing to calendar (Settings page)
