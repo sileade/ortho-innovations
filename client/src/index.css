@@ -21,6 +21,7 @@
 
 :root {
   /* Ortho Innovations Color Scheme - Light Theme */
+  /* Per TZ: фиолетовые тона для акцентов, белый фон, серые оттенки для текста, зеленые акценты для уведомлений */
   --background: 0 0% 100%;
   --foreground: 222 47% 11%;
   
@@ -30,42 +31,46 @@
   --popover: 0 0% 100%;
   --popover-foreground: 222 47% 11%;
   
-  /* Primary Blue - matching orthoinnovations.ae */
-  --primary: 217 91% 60%;
+  /* Primary Violet/Purple - per TZ requirements */
+  --primary: 262 83% 58%;
   --primary-foreground: 0 0% 100%;
   
-  /* Secondary - Light blue */
-  --secondary: 214 95% 93%;
-  --secondary-foreground: 217 91% 40%;
+  /* Secondary - Light violet */
+  --secondary: 262 60% 95%;
+  --secondary-foreground: 262 83% 40%;
   
-  --muted: 210 40% 96%;
-  --muted-foreground: 215 16% 47%;
+  --muted: 220 14% 96%;
+  --muted-foreground: 220 9% 46%;
   
-  /* Accent Orange/Coral - matching orthoinnovations.ae buttons */
-  --accent: 12 91% 64%;
+  /* Accent - Green for notifications per TZ */
+  --accent: 142 76% 36%;
   --accent-foreground: 0 0% 100%;
   
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 98%;
   
-  --border: 214 32% 91%;
-  --input: 214 32% 91%;
-  --ring: 217 91% 60%;
+  --border: 220 13% 91%;
+  --input: 220 13% 91%;
+  --ring: 262 83% 58%;
   
   /* Success green for notifications */
   --success: 142 76% 36%;
   --success-foreground: 0 0% 100%;
   
+  /* Warning orange */
+  --warning: 38 92% 50%;
+  --warning-foreground: 0 0% 100%;
+  
   --radius: 0.75rem;
   
-  /* Sidebar - Blue theme */
-  --sidebar-background: 217 91% 60%;
+  /* Sidebar - Violet theme */
+  --sidebar-background: 262 83% 58%;
   --sidebar-foreground: 0 0% 100%;
   --sidebar-primary: 0 0% 100%;
-  --sidebar-primary-foreground: 217 91% 60%;
-  --sidebar-accent: 217 91% 70%;
+  --sidebar-primary-foreground: 262 83% 58%;
+  --sidebar-accent: 262 83% 68%;
   --sidebar-accent-foreground: 0 0% 100%;
-  --sidebar-border: 217 91% 50%;
+  --sidebar-border: 262 83% 48%;
   --sidebar-ring: 0 0% 100%;
 }
 
@@ -79,33 +84,33 @@
   --popover: 222 47% 15%;
   --popover-foreground: 210 40% 98%;
   
-  --primary: 217 91% 60%;
+  --primary: 262 83% 65%;
   --primary-foreground: 0 0% 100%;
   
-  --secondary: 217 33% 17%;
+  --secondary: 262 33% 20%;
   --secondary-foreground: 210 40% 98%;
   
-  --muted: 217 33% 17%;
-  --muted-foreground: 215 20% 65%;
+  --muted: 220 33% 17%;
+  --muted-foreground: 220 20% 65%;
   
-  --accent: 12 91% 64%;
+  --accent: 142 76% 40%;
   --accent-foreground: 0 0% 100%;
   
   --destructive: 0 62% 30%;
   --destructive-foreground: 0 0% 98%;
   
-  --border: 217 33% 25%;
-  --input: 217 33% 25%;
-  --ring: 217 91% 60%;
+  --border: 220 33% 25%;
+  --input: 220 33% 25%;
+  --ring: 262 83% 65%;
   
   --sidebar-background: 222 47% 11%;
   --sidebar-foreground: 210 40% 98%;
-  --sidebar-primary: 217 91% 60%;
+  --sidebar-primary: 262 83% 65%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 217 33% 17%;
+  --sidebar-accent: 262 33% 20%;
   --sidebar-accent-foreground: 210 40% 98%;
-  --sidebar-border: 217 33% 25%;
-  --sidebar-ring: 217 91% 60%;
+  --sidebar-border: 220 33% 25%;
+  --sidebar-ring: 262 83% 65%;
 }
 
 @theme inline {
@@ -236,4 +241,10 @@
   bottom: calc(90px + env(safe-area-inset-bottom));
   right: 16px;
   z-index: 40;
+}
+
+/* Notion-style hand-drawn icon effects */
+.icon-notion {
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }

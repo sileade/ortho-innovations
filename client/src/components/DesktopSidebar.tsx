@@ -1,16 +1,25 @@
-import { Home, Activity, BookOpen, Shield, Wrench, User, Settings, Globe, Moon, Sun } from "lucide-react";
+import { Globe, Moon, Sun } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { cn } from "@/lib/utils";
+import { 
+  HomeIcon, 
+  RehabIcon, 
+  BookIcon, 
+  ProsthesisIcon, 
+  ServiceIcon, 
+  ProfileIcon,
+  SettingsIcon 
+} from "./NotionIcons";
 
 const navItems = [
-  { href: "/", icon: Home, labelKey: "nav.dashboard" },
-  { href: "/rehabilitation", icon: Activity, labelKey: "nav.rehabilitation" },
-  { href: "/knowledge", icon: BookOpen, labelKey: "nav.knowledge" },
-  { href: "/prosthesis", icon: Shield, labelKey: "nav.prosthesis" },
-  { href: "/service", icon: Wrench, labelKey: "nav.service" },
-  { href: "/profile", icon: User, labelKey: "nav.profile" },
+  { href: "/", icon: HomeIcon, labelKey: "nav.dashboard" },
+  { href: "/rehabilitation", icon: RehabIcon, labelKey: "nav.rehabilitation" },
+  { href: "/knowledge", icon: BookIcon, labelKey: "nav.knowledge" },
+  { href: "/prosthesis", icon: ProsthesisIcon, labelKey: "nav.prosthesis" },
+  { href: "/service", icon: ServiceIcon, labelKey: "nav.service" },
+  { href: "/profile", icon: ProfileIcon, labelKey: "nav.profile" },
 ];
 
 export function DesktopSidebar() {
@@ -38,6 +47,7 @@ export function DesktopSidebar() {
         {navItems.map((item) => {
           const isActive = location === item.href || 
             (item.href !== "/" && location.startsWith(item.href));
+          const Icon = item.icon;
           
           return (
             <Link
@@ -50,7 +60,7 @@ export function DesktopSidebar() {
                   : "text-white/70 hover:bg-white/10 hover:text-white"
               )}
             >
-              <item.icon className="w-5 h-5" />
+              <Icon size={20} />
               {t(item.labelKey)}
             </Link>
           );
@@ -69,7 +79,7 @@ export function DesktopSidebar() {
               : "text-white/70 hover:bg-white/10 hover:text-white"
           )}
         >
-          <Settings className="w-5 h-5" />
+          <SettingsIcon size={20} />
           {t("nav.settings")}
         </Link>
 

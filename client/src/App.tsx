@@ -12,10 +12,15 @@ import Prosthesis from "./pages/Prosthesis";
 import Service from "./pages/Service";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
+// Admin Pages
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminPatients from "./pages/admin/AdminPatients";
+import AdminAnalytics from "./pages/admin/AdminAnalytics";
 
 function Router() {
   return (
     <Switch>
+      {/* Patient App Routes */}
       <Route path={"/"} component={Dashboard} />
       <Route path={"/rehabilitation"} component={Rehabilitation} />
       <Route path={"/rehab/current"} component={Rehabilitation} />
@@ -25,6 +30,18 @@ function Router() {
       <Route path={"/service"} component={Service} />
       <Route path={"/profile"} component={Profile} />
       <Route path={"/settings"} component={Settings} />
+      
+      {/* Admin Panel Routes */}
+      <Route path={"/admin"} component={AdminDashboard} />
+      <Route path={"/admin/patients"} component={AdminPatients} />
+      <Route path={"/admin/patients/:id"} component={AdminPatients} />
+      <Route path={"/admin/analytics"} component={AdminAnalytics} />
+      <Route path={"/admin/content"} component={AdminDashboard} />
+      <Route path={"/admin/orders"} component={AdminDashboard} />
+      <Route path={"/admin/calendar"} component={AdminDashboard} />
+      <Route path={"/admin/notifications"} component={AdminDashboard} />
+      <Route path={"/admin/settings"} component={Settings} />
+      
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

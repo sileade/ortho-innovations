@@ -188,6 +188,82 @@ export const translations: Translations = {
   "common.next": { ru: "Далее", en: "Next" },
   "common.done": { ru: "Готово", en: "Done" },
   "common.min": { ru: "мин", en: "min" },
+  "common.call": { ru: "Позвонить", en: "Call" },
+  "common.message": { ru: "Написать", en: "Message" },
+  
+  // Dashboard Team
+  "dashboard.yourTeam": { ru: "Ваша команда", en: "Your Team" },
+  "dashboard.nearestCenter": { ru: "Ближайший сервисный центр", en: "Nearest Service Center" },
+  "dashboard.serviceCenterName": { ru: "Ortho Innovations Москва", en: "Ortho Innovations Moscow" },
+  "dashboard.serviceCenterAddress": { ru: "ул. Тверская, 15, Москва", en: "15 Tverskaya St, Moscow" },
+  
+  // Admin Panel
+  "admin.doctorPanel": { ru: "Панель врача", en: "Doctor Panel" },
+  "admin.backToPatient": { ru: "К приложению", en: "Back to App" },
+  
+  // Admin Navigation
+  "admin.nav.dashboard": { ru: "Главная", en: "Dashboard" },
+  "admin.nav.patients": { ru: "Пациенты", en: "Patients" },
+  "admin.nav.content": { ru: "Контент", en: "Content" },
+  "admin.nav.orders": { ru: "Заказы", en: "Orders" },
+  "admin.nav.calendar": { ru: "Календарь", en: "Calendar" },
+  "admin.nav.notifications": { ru: "Уведомления", en: "Notifications" },
+  "admin.nav.analytics": { ru: "Аналитика", en: "Analytics" },
+  
+  // Admin Dashboard
+  "admin.dashboard.title": { ru: "Панель управления", en: "Admin Dashboard" },
+  "admin.dashboard.recentPatients": { ru: "Последние пациенты", en: "Recent Patients" },
+  "admin.dashboard.pendingTasks": { ru: "Ожидающие задачи", en: "Pending Tasks" },
+  "admin.dashboard.tasks": { ru: "задач", en: "tasks" },
+  
+  // Admin Stats
+  "admin.stats.totalPatients": { ru: "Всего пациентов", en: "Total Patients" },
+  "admin.stats.activeToday": { ru: "Активны сегодня", en: "Active Today" },
+  "admin.stats.pendingOrders": { ru: "Заявки в ожидании", en: "Pending Orders" },
+  "admin.stats.appointmentsToday": { ru: "Приёмов сегодня", en: "Appointments Today" },
+  "admin.stats.vsLastMonth": { ru: "вс прошлый месяц", en: "vs last month" },
+  
+  // Admin Status
+  "admin.status.all": { ru: "Все", en: "All" },
+  "admin.status.active": { ru: "Активный", en: "Active" },
+  "admin.status.pending": { ru: "Ожидает", en: "Pending" },
+  "admin.status.inactive": { ru: "Неактивный", en: "Inactive" },
+  
+  // Admin Actions
+  "admin.actions.addPatient": { ru: "Добавить пациента", en: "Add Patient" },
+  "admin.actions.sendNotification": { ru: "Отправить уведомление", en: "Send Notification" },
+  
+  // Admin Patients
+  "admin.patients.title": { ru: "Управление пациентами", en: "Patient Management" },
+  "admin.patients.searchPlaceholder": { ru: "Поиск пациентов...", en: "Search patients..." },
+  "admin.patients.export": { ru: "Экспорт", en: "Export" },
+  "admin.patients.addNew": { ru: "Добавить", en: "Add New" },
+  "admin.patients.name": { ru: "Имя", en: "Name" },
+  "admin.patients.contact": { ru: "Контакт", en: "Contact" },
+  "admin.patients.prosthesis": { ru: "Протез", en: "Prosthesis" },
+  "admin.patients.progress": { ru: "Прогресс", en: "Progress" },
+  "admin.patients.status": { ru: "Статус", en: "Status" },
+  "admin.patients.showing": { ru: "Показано", en: "Showing" },
+  "admin.patients.of": { ru: "из", en: "of" },
+  
+  // Admin Analytics
+  "admin.analytics.title": { ru: "Аналитика и отчёты", en: "Analytics & Reports" },
+  "admin.analytics.exportCSV": { ru: "Экспорт CSV", en: "Export CSV" },
+  "admin.analytics.kpiTitle": { ru: "Ключевые показатели", en: "Key Performance Indicators" },
+  "admin.analytics.target": { ru: "Цель", en: "Target" },
+  "admin.analytics.achieved": { ru: "Достигнуто", en: "Achieved" },
+  "admin.analytics.inProgress": { ru: "В процессе", en: "In Progress" },
+  "admin.analytics.monthlyUsers": { ru: "Пользователи по месяцам", en: "Monthly Users" },
+  "admin.analytics.revenue": { ru: "Выручка", en: "Revenue" },
+  "admin.analytics.totalUsers": { ru: "Всего пользователей", en: "Total Users" },
+  "admin.analytics.totalRevenue": { ru: "Общая выручка", en: "Total Revenue" },
+  "admin.analytics.topArticles": { ru: "Популярные статьи", en: "Top Articles" },
+  "admin.analytics.views": { ru: "просмотров", en: "views" },
+  "admin.analytics.userActivity": { ru: "Активность пользователей", en: "User Activity" },
+  "admin.analytics.dailyActive": { ru: "Активных за день", en: "Daily Active" },
+  "admin.analytics.weeklyActive": { ru: "Активных за неделю", en: "Weekly Active" },
+  "admin.analytics.exercisesCompleted": { ru: "Упражнений выполнено", en: "Exercises Completed" },
+  "admin.analytics.avgStreak": { ru: "Средняя серия", en: "Average Streak" },
 };
 
 interface LanguageContextType {

@@ -2,17 +2,18 @@ import { AppLayout } from "@/components/AppLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Link } from "wouter";
+import { AddToCalendar } from "@/components/AddToCalendar";
+import { createAppointmentEvent } from "@/lib/calendar";
 import { 
-  CheckCircle2, 
-  Clock, 
-  Play, 
-  ChevronRight,
-  Trophy,
-  Flame,
-  Calendar,
-  Target
-} from "lucide-react";
+  CheckIcon, 
+  ClockIcon, 
+  PlayIcon, 
+  ChevronRightIcon,
+  TrophyIcon,
+  FireIcon,
+  CalendarIcon,
+  TargetIcon
+} from "@/components/NotionIcons";
 
 const phases = [
   { id: 1, title: { ru: "Начальное восстановление", en: "Initial Recovery" }, status: "completed", progress: 100, tasks: 12 },
@@ -30,8 +31,22 @@ const todaysTasks = [
 ];
 
 const appointments = [
-  { id: 1, title: { ru: "Осмотр у Dr. Smith", en: "Check-up with Dr. Smith" }, date: "Dec 11", time: "10:00 AM" },
-  { id: 2, title: { ru: "Физиотерапия", en: "Physical Therapy" }, date: "Dec 13", time: "2:00 PM" },
+  { 
+    id: 1, 
+    title: { ru: "Осмотр у Dr. Smith", en: "Check-up with Dr. Smith" }, 
+    date: "Dec 11", 
+    time: "10:00",
+    doctor: "Dr. Smith",
+    dateObj: new Date(2024, 11, 11, 10, 0)
+  },
+  { 
+    id: 2, 
+    title: { ru: "Физиотерапия", en: "Physical Therapy" }, 
+    date: "Dec 13", 
+    time: "14:00",
+    doctor: "Physical Therapist",
+    dateObj: new Date(2024, 11, 13, 14, 0)
+  },
 ];
 
 export default function Rehabilitation() {
@@ -54,7 +69,7 @@ export default function Rehabilitation() {
           <Card className="border-none shadow-sm">
             <CardContent className="p-4 text-center">
               <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-2">
-                <Trophy className="w-5 h-5 lg:w-6 lg:h-6 text-primary" />
+                <TrophyIcon size={22} className="text-primary" />
               </div>
               <p className="text-xl lg:text-2xl font-bold">156</p>
               <p className="text-xs lg:text-sm text-muted-foreground">{t("rehab.exercisesCompleted")}</p>
@@ -64,7 +79,7 @@ export default function Rehabilitation() {
           <Card className="border-none shadow-sm">
             <CardContent className="p-4 text-center">
               <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-accent/10 flex items-center justify-center mx-auto mb-2">
-                <Clock className="w-5 h-5 lg:w-6 lg:h-6 text-accent" />
+                <ClockIcon size={22} className="text-accent" />
               </div>
               <p className="text-xl lg:text-2xl font-bold">2,340</p>
               <p className="text-xs lg:text-sm text-muted-foreground">{t("rehab.activeMinutes")}</p>
@@ -74,7 +89,7 @@ export default function Rehabilitation() {
           <Card className="border-none shadow-sm">
             <CardContent className="p-4 text-center">
               <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center mx-auto mb-2">
-                <Flame className="w-5 h-5 lg:w-6 lg:h-6 text-orange-500" />
+                <FireIcon size={22} className="text-orange-500" />
               </div>
               <p className="text-xl lg:text-2xl font-bold">12</p>
               <p className="text-xs lg:text-sm text-muted-foreground">{t("rehab.streak")} {t("rehab.days")}</p>
@@ -91,7 +106,7 @@ export default function Rehabilitation() {
               <CardContent className="p-4 lg:p-6">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <Target className="w-5 h-5 text-primary" />
+                    <TargetIcon size={20} className="text-primary" />
                     <span className="font-semibold">{t("rehab.todaysProgress")}</span>
                   </div>
                   <span className="text-2xl font-bold text-primary">{progressPercent}%</span>
@@ -122,9 +137,9 @@ export default function Rehabilitation() {
                           : 'bg-accent/10'
                       }`}>
                         {task.completed ? (
-                          <CheckCircle2 className="w-5 h-5 lg:w-6 lg:h-6 text-primary" />
+                          <CheckIcon size={22} className="text-primary" />
                         ) : (
-                          <Play className="w-5 h-5 lg:w-6 lg:h-6 text-accent" />
+                          <PlayIcon size={22} className="text-accent" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -132,7 +147,7 @@ export default function Rehabilitation() {
                           {task.title[language]}
                         </p>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <Clock className="w-3 h-3" />
+                          <ClockIcon size={12} />
                           {task.duration} {t("common.min")}
                         </div>
                       </div>
@@ -155,16 +170,23 @@ export default function Rehabilitation() {
               <h2 className="font-bold text-lg">{t("rehab.upcomingAppointments")}</h2>
               <div className="space-y-2">
                 {appointments.map((apt) => (
-                  <Card key={apt.id} className="border-none shadow-sm card-interactive">
-                    <CardContent className="p-4 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                        <Calendar className="w-5 h-5 text-primary" />
+                  <Card key={apt.id} className="border-none shadow-sm">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                          <CalendarIcon size={20} className="text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm">{apt.title[language]}</p>
+                          <p className="text-xs text-muted-foreground">{apt.date} · {apt.time}</p>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm">{apt.title[language]}</p>
-                        <p className="text-xs text-muted-foreground">{apt.date} · {apt.time}</p>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                      <AddToCalendar 
+                        event={createAppointmentEvent(apt.doctor, apt.dateObj, 60, "Ortho Innovations Clinic")}
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                      />
                     </CardContent>
                   </Card>
                 ))}

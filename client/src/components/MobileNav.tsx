@@ -1,15 +1,22 @@
-import { Home, Activity, BookOpen, Shield, Wrench, User } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
+import { 
+  HomeIcon, 
+  RehabIcon, 
+  BookIcon, 
+  ProsthesisIcon, 
+  ServiceIcon, 
+  ProfileIcon 
+} from "./NotionIcons";
 
 const navItems = [
-  { href: "/", icon: Home, labelKey: "nav.dashboard" },
-  { href: "/rehabilitation", icon: Activity, labelKey: "nav.rehabilitation" },
-  { href: "/knowledge", icon: BookOpen, labelKey: "nav.knowledge" },
-  { href: "/prosthesis", icon: Shield, labelKey: "nav.prosthesis" },
-  { href: "/service", icon: Wrench, labelKey: "nav.service" },
-  { href: "/profile", icon: User, labelKey: "nav.profile" },
+  { href: "/", icon: HomeIcon, labelKey: "nav.dashboard" },
+  { href: "/rehabilitation", icon: RehabIcon, labelKey: "nav.rehabilitation" },
+  { href: "/knowledge", icon: BookIcon, labelKey: "nav.knowledge" },
+  { href: "/prosthesis", icon: ProsthesisIcon, labelKey: "nav.prosthesis" },
+  { href: "/service", icon: ServiceIcon, labelKey: "nav.service" },
+  { href: "/profile", icon: ProfileIcon, labelKey: "nav.profile" },
 ];
 
 export function MobileNav() {
@@ -22,6 +29,7 @@ export function MobileNav() {
         {navItems.map((item) => {
           const isActive = location === item.href || 
             (item.href !== "/" && location.startsWith(item.href));
+          const Icon = item.icon;
           
           return (
             <Link
@@ -34,12 +42,12 @@ export function MobileNav() {
                   : "text-muted-foreground"
               )}
             >
-              <item.icon 
+              <Icon 
                 className={cn(
-                  "w-5 h-5 mb-0.5 transition-transform",
+                  "mb-0.5 transition-transform",
                   isActive && "scale-110"
                 )} 
-                strokeWidth={isActive ? 2.5 : 2}
+                size={20}
               />
               <span className={cn(
                 "text-[10px] font-medium",

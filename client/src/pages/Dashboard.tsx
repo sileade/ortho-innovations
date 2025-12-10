@@ -3,22 +3,49 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "wouter";
 import { 
-  Calendar, 
-  CheckCircle2, 
-  Clock, 
-  Shield, 
-  Activity, 
-  BookOpen, 
-  Wrench,
-  ChevronRight,
-  Play
-} from "lucide-react";
+  CalendarIcon, 
+  CheckIcon, 
+  ClockIcon, 
+  ShieldIcon, 
+  RehabIcon, 
+  BookIcon, 
+  ServiceIcon,
+  ChevronRightIcon,
+  PlayIcon,
+  ProfileIcon,
+  PhoneIcon,
+  MapPinIcon
+} from "@/components/NotionIcons";
 
 const todaysTasks = [
   { id: 1, title: { ru: "Утренняя растяжка", en: "Morning Stretch Routine" }, duration: "15", completed: true },
   { id: 2, title: { ru: "Укрепление квадрицепса", en: "Quad Strengthening" }, duration: "20", completed: true },
   { id: 3, title: { ru: "Ледяная терапия", en: "Ice Therapy" }, duration: "15", completed: false },
   { id: 4, title: { ru: "Вечерняя прогулка", en: "Evening Walk" }, duration: "30", completed: false },
+];
+
+const teamMembers = [
+  { 
+    id: 1, 
+    role: { ru: "Личный менеджер", en: "Personal Manager" },
+    name: "Анна Петрова",
+    phone: "+7 (495) 123-45-67",
+    hours: { ru: "Пн-Пт 9:00-18:00", en: "Mon-Fri 9:00-18:00" }
+  },
+  { 
+    id: 2, 
+    role: { ru: "Протезист", en: "Prosthetist" },
+    name: "Иван Сидоров",
+    phone: "+7 (495) 123-45-68",
+    hours: { ru: "Пн-Сб 10:00-19:00", en: "Mon-Sat 10:00-19:00" }
+  },
+  { 
+    id: 3, 
+    role: { ru: "Врач ЛФК", en: "Rehab Doctor" },
+    name: "Dr. Smith",
+    phone: "+7 (495) 123-45-69",
+    hours: { ru: "Пн-Пт 8:00-17:00", en: "Mon-Fri 8:00-17:00" }
+  },
 ];
 
 export default function Dashboard() {
@@ -48,7 +75,7 @@ export default function Dashboard() {
             <Card className="border-none shadow-sm card-interactive bg-gradient-to-br from-primary/10 to-primary/5 h-full">
               <CardContent className="p-4 lg:p-6">
                 <div className="flex items-center gap-2 text-primary mb-2">
-                  <Calendar className="w-4 h-4 lg:w-5 lg:h-5" />
+                  <CalendarIcon size={18} />
                   <span className="text-xs lg:text-sm font-medium uppercase tracking-wide">
                     {t("dashboard.nextAppointment")}
                   </span>
@@ -64,7 +91,7 @@ export default function Dashboard() {
             <Card className="border-none shadow-sm card-interactive h-full">
               <CardContent className="p-4 lg:p-6">
                 <div className="flex items-center gap-2 text-primary mb-2">
-                  <CheckCircle2 className="w-4 h-4 lg:w-5 lg:h-5" />
+                  <CheckIcon size={18} />
                   <span className="text-xs lg:text-sm font-medium uppercase tracking-wide">
                     {t("dashboard.dailyGoal")}
                   </span>
@@ -83,7 +110,7 @@ export default function Dashboard() {
               <CardContent className="p-4 lg:p-6 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                    <Shield className="w-6 h-6 text-green-600" />
+                    <ShieldIcon size={24} className="text-green-600" />
                   </div>
                   <div>
                     <p className="text-xs lg:text-sm font-medium text-muted-foreground uppercase tracking-wide">
@@ -98,7 +125,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                 </div>
-                <ChevronRight className="w-5 h-5 text-muted-foreground hidden lg:block" />
+                <ChevronRightIcon size={20} className="text-muted-foreground hidden lg:block" />
               </CardContent>
             </Card>
           </Link>
@@ -115,7 +142,7 @@ export default function Dashboard() {
                 className="text-sm text-primary font-medium flex items-center gap-1 hover:underline"
               >
                 {t("rehab.viewAll")}
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRightIcon size={16} />
               </Link>
             </div>
 
@@ -130,9 +157,9 @@ export default function Dashboard() {
                           : 'bg-accent/10'
                       }`}>
                         {task.completed ? (
-                          <CheckCircle2 className="w-5 h-5 lg:w-6 lg:h-6 text-primary" />
+                          <CheckIcon size={22} className="text-primary" />
                         ) : (
-                          <Play className="w-5 h-5 lg:w-6 lg:h-6 text-accent" />
+                          <PlayIcon size={22} className="text-accent" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -140,11 +167,11 @@ export default function Dashboard() {
                           {task.title[language]}
                         </p>
                         <div className="flex items-center gap-1 text-xs lg:text-sm text-muted-foreground">
-                          <Clock className="w-3 h-3" />
+                          <ClockIcon size={12} />
                           {task.duration} {t("common.min")}
                         </div>
                       </div>
-                      <ChevronRight className="w-5 h-5 text-muted-foreground/50" />
+                      <ChevronRightIcon size={20} className="text-muted-foreground/50" />
                     </CardContent>
                   </Card>
                 </Link>
@@ -160,7 +187,7 @@ export default function Dashboard() {
                 <Card className="border-none shadow-sm card-interactive">
                   <CardContent className="p-4 lg:p-5 flex flex-col lg:flex-row items-center lg:gap-4 text-center lg:text-left">
                     <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-2 lg:mb-0">
-                      <Activity className="w-6 h-6 text-primary" />
+                      <RehabIcon size={24} className="text-primary" />
                     </div>
                     <span className="text-xs lg:text-base font-medium">{t("dashboard.viewPlan")}</span>
                   </CardContent>
@@ -171,7 +198,7 @@ export default function Dashboard() {
                 <Card className="border-none shadow-sm card-interactive">
                   <CardContent className="p-4 lg:p-5 flex flex-col lg:flex-row items-center lg:gap-4 text-center lg:text-left">
                     <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center mb-2 lg:mb-0">
-                      <BookOpen className="w-6 h-6 text-secondary-foreground" />
+                      <BookIcon size={24} className="text-secondary-foreground" />
                     </div>
                     <span className="text-xs lg:text-base font-medium">{t("dashboard.articles")}</span>
                   </CardContent>
@@ -182,7 +209,7 @@ export default function Dashboard() {
                 <Card className="border-none shadow-sm card-interactive">
                   <CardContent className="p-4 lg:p-5 flex flex-col lg:flex-row items-center lg:gap-4 text-center lg:text-left">
                     <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-2 lg:mb-0">
-                      <Wrench className="w-6 h-6 text-accent" />
+                      <ServiceIcon size={24} className="text-accent" />
                     </div>
                     <span className="text-xs lg:text-base font-medium">{t("dashboard.bookService")}</span>
                   </CardContent>
@@ -191,6 +218,76 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+
+        {/* Team Section */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="font-bold text-lg lg:text-xl">{t("dashboard.yourTeam")}</h2>
+            <Link 
+              href="/profile" 
+              className="text-sm text-primary font-medium flex items-center gap-1 hover:underline"
+            >
+              {t("rehab.viewAll")}
+              <ChevronRightIcon size={16} />
+            </Link>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {teamMembers.map((member) => (
+              <Card key={member.id} className="border-none shadow-sm card-interactive">
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <ProfileIcon size={24} className="text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                        {member.role[language]}
+                      </p>
+                      <p className="font-semibold truncate">{member.name}</p>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                        <ClockIcon size={12} />
+                        {member.hours[language]}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-border flex gap-2">
+                    <a 
+                      href={`tel:${member.phone.replace(/[^+\d]/g, '')}`}
+                      className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors"
+                    >
+                      <PhoneIcon size={16} />
+                      {t("common.call")}
+                    </a>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Service Center */}
+        <Link href="/service">
+          <Card className="border-none shadow-sm card-interactive bg-gradient-to-r from-primary/5 to-primary/10">
+            <CardContent className="p-4 lg:p-6">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <MapPinIcon size={28} className="text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                    {t("dashboard.nearestCenter")}
+                  </p>
+                  <p className="font-semibold text-lg">{t("dashboard.serviceCenterName")}</p>
+                  <p className="text-sm text-muted-foreground truncate">
+                    {t("dashboard.serviceCenterAddress")}
+                  </p>
+                </div>
+                <ChevronRightIcon size={24} className="text-muted-foreground hidden md:block" />
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
     </AppLayout>
   );
