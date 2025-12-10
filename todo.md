@@ -132,3 +132,12 @@
 - [x] Run TypeScript strict checks (no errors)
 - [x] Review code for optimization (clean, no TODOs/FIXMEs)
 - [x] Fix identified issues (removed 1 console.log)
+
+## UI Improvements
+- [x] Make sidebar text more expressive and readable
+- [x] Increase font contrast on sidebar (white/85)
+- [x] Improve font weight and size for navigation items (24px icons, bold text)
+
+## Docker Deployment Update
+- [x] Update Docker Compose guide with lessons learned (Quick Start section added)
+- [x] Test on internal IP address (169.254.0.21:3000)

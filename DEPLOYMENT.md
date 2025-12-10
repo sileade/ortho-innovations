@@ -514,3 +514,172 @@ sudo ufw enable
 При возникновении проблем обращайтесь:
 - Email: support@orthoinnovations.ae
 - GitHub Issues: https://github.com/ortho-innovations/patient-app/issues
+
+
+## Быстрый старт (Quick Start)
+
+Для быстрого локального тестирования без SSL и nginx используйте упрощённый docker-compose.dev.yml:
+
+### Шаг 1: Клонирование и настройка
+
+```bash
+# Клонирование репозитория
+git clone https://github.com/sileade/ortho-patient-app.git
+cd ortho-patient-app
+
+# Создание .env файла
+cat > .env << EOF
+DB_PASSWORD=$(openssl rand -base64 16)
+JWT_SECRET=$(openssl rand -base64 32)
+EOF
+```
+
+### Шаг 2: Запуск с docker-compose.dev.yml
+
+```bash
+# Запуск в режиме разработки
+docker compose -f docker-compose.dev.yml up -d --build
+
+# Проверка статуса
+docker compose -f docker-compose.dev.yml ps
+
+# Просмотр логов
+docker compose -f docker-compose.dev.yml logs -f app
+```
+
+### Шаг 3: Применение миграций
+
+```bash
+docker compose -f docker-compose.dev.yml exec app pnpm db:push
+```
+
+### Шаг 4: Доступ к приложению
+
+Приложение будет доступно по адресу:
+- http://localhost:3000 - с локальной машины
+- http://[IP-адрес-сервера]:3000 - с других устройств в сети
+
+## Тестирование на внутреннем IP
+
+Для тестирования приложения на внутреннем IP адресе контейнера:
+
+### Определение IP адреса
+
+```bash
+# Получение IP адреса хоста
+hostname -I | awk '{print $1}'
+
+# Или для Docker контейнера
+docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ortho-patient-app
+```
+
+### Доступ с других устройств
+
+После запуска приложения оно будет доступно по адресу:
+
+```
+http://[ваш-IP]:3000
+```
+
+Например, если IP адрес сервера 172.27.4.216:
+
+```
+http://172.27.4.216:3000
+```
+
+### Проверка доступности
+
+```bash
+# Проверка с сервера
+curl -I http://localhost:3000
+
+# Проверка с внешнего IP
+curl -I http://172.27.4.216:3000
+```
+
+### Настройка файрвола для локального тестирования
+
+```bash
+# Открытие порта 3000 для локальной сети
+sudo ufw allow from 172.27.0.0/16 to any port 3000
+
+# Или для всех подключений (только для тестирования!)
+sudo ufw allow 3000/tcp
+```
+
+## Известные проблемы и решения
+
+### Проблема: Контейнер не запускается
+
+**Решение:**
+```bash
+# Проверка логов
+docker compose logs app
+
+# Проверка доступности базы данных
+docker compose exec db pg_isready -U ortho
+
+# Перезапуск с пересборкой
+docker compose down && docker compose up -d --build
+```
+
+### Проблема: Ошибка подключения к базе данных
+
+**Решение:**
+```bash
+# Проверка переменных окружения
+docker compose exec app env | grep DATABASE
+
+# Проверка сети Docker
+docker network ls
+docker network inspect ortho-patient-app_ortho-network
+```
+
+### Проблема: Приложение недоступно по внешнему IP
+
+**Решение:**
+```bash
+# Проверка, что приложение слушает на всех интерфейсах
+docker compose exec app netstat -tlnp
+
+# Проверка файрвола
+sudo ufw status
+
+# Проверка, что порт открыт
+sudo ss -tlnp | grep 3000
+```
+
+## Переменные окружения
+
+| Переменная | Описание | Обязательная |
+|------------|----------|--------------|
+| DB_PASSWORD | Пароль PostgreSQL | Да |
+| JWT_SECRET | Секрет для JWT токенов (мин. 32 символа) | Да |
+| DATABASE_URL | URL подключения к БД (автоматически) | Нет |
+| NODE_ENV | Окружение (production/development) | Нет |
+| VITE_APP_TITLE | Название приложения | Нет |
+
+## Полезные команды
+
+```bash
+# Остановка всех контейнеров
+docker compose down
+
+# Удаление всех данных (включая БД)
+docker compose down -v
+
+# Просмотр использования ресурсов
+docker stats
+
+# Вход в контейнер приложения
+docker compose exec app sh
+
+# Вход в контейнер базы данных
+docker compose exec db psql -U ortho ortho_patient
+
+# Экспорт базы данных
+docker compose exec db pg_dump -U ortho ortho_patient > backup.sql
+
+# Импорт базы данных
+docker compose exec -T db psql -U ortho ortho_patient < backup.sql
+```

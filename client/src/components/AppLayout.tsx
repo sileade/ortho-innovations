@@ -74,7 +74,7 @@ export function AppLayout({ children, title }: AppLayoutProps) {
       </header>
 
       {/* Main Content with Swipe Navigation */}
-      <main className="lg:ml-64 page-with-nav lg:pb-8">
+      <main className="lg:ml-72 page-with-nav lg:pb-8">
         <SwipeNavigation showBackButton={!isHomePage} title={title}>
           {children}
         </SwipeNavigation>
