@@ -1,6 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
+import { ProfileSummary } from "./ProfileSummary";
 import { 
   HomeIcon, 
   RehabIcon, 
@@ -16,7 +17,6 @@ const navItems = [
   { href: "/knowledge", icon: BookIcon, labelKey: "nav.knowledge" },
   { href: "/prosthesis", icon: ProsthesisIcon, labelKey: "nav.prosthesis" },
   { href: "/service", icon: ServiceIcon, labelKey: "nav.service" },
-  { href: "/profile", icon: ProfileIcon, labelKey: "nav.profile" },
 ];
 
 export function MobileNav() {
@@ -58,6 +58,32 @@ export function MobileNav() {
             </Link>
           );
         })}
+        
+        {/* Profile button with summary popup */}
+        <ProfileSummary>
+          <button
+            className={cn(
+              "flex flex-col items-center justify-center py-1 px-2 rounded-xl transition-all touch-target",
+              location === "/profile" || location.startsWith("/profile")
+                ? "text-primary"
+                : "text-muted-foreground"
+            )}
+          >
+            <ProfileIcon 
+              className={cn(
+                "mb-0.5 transition-transform",
+                (location === "/profile" || location.startsWith("/profile")) && "scale-110"
+              )} 
+              size={20}
+            />
+            <span className={cn(
+              "text-[10px] font-medium",
+              (location === "/profile" || location.startsWith("/profile")) && "font-semibold"
+            )}>
+              {t("nav.profile")}
+            </span>
+          </button>
+        </ProfileSummary>
       </div>
     </nav>
   );

@@ -2,6 +2,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "wouter";
+import { getTimeBasedGreeting, getMotivationalMessage } from "@/lib/greeting";
 import { 
   CalendarIcon, 
   CheckIcon, 
@@ -54,6 +55,10 @@ export default function Dashboard() {
   const completedTasks = todaysTasks.filter(task => task.completed).length;
   const totalTasks = todaysTasks.length;
   const progressPercent = Math.round((completedTasks / totalTasks) * 100);
+  
+  // Dynamic greeting based on time of day
+  const greetingData = getTimeBasedGreeting();
+  const motivationalMessage = getMotivationalMessage(dayNumber, language);
 
   return (
     <AppLayout>
@@ -61,10 +66,10 @@ export default function Dashboard() {
         {/* Greeting */}
         <div className="space-y-1">
           <h1 className="text-2xl lg:text-3xl font-bold text-foreground flex items-center gap-2">
-            👋 {t("dashboard.greeting")}, Alex
+            {greetingData.emoji} {greetingData.greeting[language]}, Alex
           </h1>
           <p className="text-muted-foreground text-sm lg:text-base">
-            {t("dashboard.journey", { day: dayNumber })}
+            {language === 'ru' ? `День ${dayNumber} вашего пути восстановления.` : `Day ${dayNumber} of your recovery journey.`} {motivationalMessage}
           </p>
         </div>
 

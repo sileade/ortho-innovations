@@ -86,3 +86,10 @@
 - [x] Update README.md with documentation
 - [x] Docker Compose deployment guide for Debian 13
 - [ ] API documentation
+
+
+## UX Improvements (New)
+- [x] Dynamic greeting based on time of day (утро/день/вечер/ночь)
+- [x] Back button with proper navigation
+- [x] Swipe gesture navigation (iPhone-style)
+- [x] Profile summary popup on profile button click

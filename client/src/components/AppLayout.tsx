@@ -1,8 +1,10 @@
 import { MobileNav } from "./MobileNav";
 import { DesktopSidebar } from "./DesktopSidebar";
+import { SwipeNavigation } from "./SwipeNavigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Globe, Moon, Sun } from "lucide-react";
+import { useLocation } from "wouter";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -12,6 +14,10 @@ interface AppLayoutProps {
 export function AppLayout({ children, title }: AppLayoutProps) {
   const { language, setLanguage } = useLanguage();
   const { theme, setTheme } = useTheme();
+  const [location] = useLocation();
+  
+  // Don't show back button on home page
+  const isHomePage = location === "/" || location === "";
 
   return (
     <div className="min-h-screen bg-background">
@@ -56,9 +62,11 @@ export function AppLayout({ children, title }: AppLayoutProps) {
         </div>
       </header>
 
-      {/* Main Content */}
+      {/* Main Content with Swipe Navigation */}
       <main className="lg:ml-64 page-with-nav lg:pb-8">
-        {children}
+        <SwipeNavigation showBackButton={!isHomePage} title={title}>
+          {children}
+        </SwipeNavigation>
       </main>
 
       {/* Mobile Bottom Navigation - hidden on desktop */}

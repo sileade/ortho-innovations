@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { cn } from "@/lib/utils";
+import { ProfileSummary } from "./ProfileSummary";
 import { 
   HomeIcon, 
   RehabIcon, 
@@ -19,7 +20,6 @@ const navItems = [
   { href: "/knowledge", icon: BookIcon, labelKey: "nav.knowledge" },
   { href: "/prosthesis", icon: ProsthesisIcon, labelKey: "nav.prosthesis" },
   { href: "/service", icon: ServiceIcon, labelKey: "nav.service" },
-  { href: "/profile", icon: ProfileIcon, labelKey: "nav.profile" },
 ];
 
 export function DesktopSidebar() {
@@ -65,6 +65,21 @@ export function DesktopSidebar() {
             </Link>
           );
         })}
+        
+        {/* Profile with Summary Popup */}
+        <ProfileSummary>
+          <button
+            className={cn(
+              "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left",
+              location === "/profile" || location.startsWith("/profile")
+                ? "bg-white/20 text-white font-medium"
+                : "text-white/70 hover:bg-white/10 hover:text-white"
+            )}
+          >
+            <ProfileIcon size={20} />
+            {t("nav.profile")}
+          </button>
+        </ProfileSummary>
       </nav>
 
       {/* Bottom Section */}
