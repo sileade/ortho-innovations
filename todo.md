@@ -132,3 +132,9 @@
 - [x] Run TypeScript strict checks (no errors)
 - [x] Review code for optimization (clean, no TODOs/FIXMEs)
 - [x] Fix identified issues (removed 1 console.log)
+
+## Project Merge
+- [x] Analyze ortho-innovations project structure
+- [x] Copy patient app into ortho-innovations/frontend/patient-app
+- [x] Update combined README.md with screenshots
+- [x] Commit and push to GitHub (https://github.com/sileade/ortho-innovations)
