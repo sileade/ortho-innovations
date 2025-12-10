@@ -5,6 +5,7 @@ import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 import * as db from "./db";
 import { getPatientRehabEvents, generateICSFeed, getCalendarSubscriptionURL } from "./calendar-feed";
+import { processReminders, getNotificationPreferences, updateNotificationPreferences, REMINDER_INTERVALS } from "./notifications";
 
 export const appRouter = router({
   system: systemRouter,
@@ -142,6 +143,26 @@ export const appRouter = router({
     
     markAllAsRead: protectedProcedure.mutation(async ({ ctx }) => {
       return db.markAllNotificationsAsRead(ctx.user.id);
+    }),
+    
+    // Notification preferences
+    getPreferences: protectedProcedure.query(async ({ ctx }) => {
+      return getNotificationPreferences(ctx.user.id);
+    }),
+    
+    updatePreferences: protectedProcedure
+      .input(z.object({
+        emailEnabled: z.boolean().optional(),
+        pushEnabled: z.boolean().optional(),
+        reminderDays: z.array(z.number()).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return updateNotificationPreferences(ctx.user.id, input);
+      }),
+    
+    // Get available reminder intervals
+    getReminderIntervals: publicProcedure.query(() => {
+      return REMINDER_INTERVALS;
     }),
   }),
 

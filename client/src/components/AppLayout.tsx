@@ -1,9 +1,10 @@
 import { MobileNav } from "./MobileNav";
 import { DesktopSidebar } from "./DesktopSidebar";
 import { SwipeNavigation } from "./SwipeNavigation";
+import { ProfileSummary } from "./ProfileSummary";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { Globe, Moon, Sun } from "lucide-react";
+import { Globe, Moon, Sun, User } from "lucide-react";
 import { useLocation } from "wouter";
 
 interface AppLayoutProps {
@@ -58,6 +59,16 @@ export function AppLayout({ children, title }: AppLayoutProps) {
               <Globe className="w-4 h-4" />
               {language.toUpperCase()}
             </button>
+            
+            {/* Profile Button */}
+            <ProfileSummary>
+              <button
+                className="flex items-center justify-center w-9 h-9 rounded-full bg-white/20 transition-colors hover:bg-white/30"
+                aria-label="Profile"
+              >
+                <User className="w-4 h-4" />
+              </button>
+            </ProfileSummary>
           </div>
         </div>
       </header>

@@ -55,6 +55,19 @@ function generateEventICS(event: CalendarEvent): string {
     lines.push(`LOCATION:${escapeICSText(event.location)}`);
   }
 
+  // Add multiple reminders: 60, 30, 7, and 1 day before
+  const reminderDays = [60, 30, 7, 1];
+  for (const days of reminderDays) {
+    lines.push(
+      'BEGIN:VALARM',
+      'ACTION:DISPLAY',
+      `TRIGGER:-P${days}D`, // P = Period, D = Days
+      `DESCRIPTION:Reminder: ${escapeICSText(event.title)} in ${days} days`,
+      'END:VALARM'
+    );
+  }
+  
+  // Also add the original minute-based reminder if specified
   if (event.reminder) {
     lines.push(
       'BEGIN:VALARM',

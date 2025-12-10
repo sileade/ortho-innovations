@@ -4,6 +4,7 @@ import { Switch } from "@/components/ui/switch";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { CalendarSync } from "@/components/CalendarSync";
+import { NotificationPreferences } from "@/components/NotificationPreferences";
 import { Bell, Moon, Globe, Lock, HelpCircle, FileText, LogOut, ChevronRight, Mail, Smartphone, Dumbbell, Megaphone, Shield, Key, Calendar } from "lucide-react";
 
 export default function Settings() {
@@ -51,16 +52,20 @@ export default function Settings() {
                 </div>
                 <Switch defaultChecked />
               </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Dumbbell className="w-5 h-5 text-muted-foreground" />
-                  <div>
-                    <p className="font-medium text-sm">{t("settings.reminders")}</p>
-                    <p className="text-xs text-muted-foreground">{t("settings.remindersDesc")}</p>
+              <NotificationPreferences>
+                <div className="flex items-center justify-between cursor-pointer hover:bg-muted/50 -mx-2 px-2 py-2 rounded-lg transition-colors">
+                  <div className="flex items-center gap-3">
+                    <Dumbbell className="w-5 h-5 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium text-sm">{t("settings.reminders")}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {language === 'ru' ? 'За 60, 30, 7, 1 день до события' : '60, 30, 7, 1 days before event'}
+                      </p>
+                    </div>
                   </div>
+                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
                 </div>
-                <Switch defaultChecked />
-              </div>
+              </NotificationPreferences>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Megaphone className="w-5 h-5 text-muted-foreground" />

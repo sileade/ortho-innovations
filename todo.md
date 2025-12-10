@@ -101,3 +101,15 @@
 - [x] Apple Calendar subscription integration
 - [x] Auto-update when schedule changes (hourly refresh)
 - [x] UI for subscribing to calendar (Settings page)
+
+## Push Notifications & Reminders
+- [x] Push notification service setup
+- [x] Reminder system: 60 days before event
+- [x] Reminder system: 30 days before event
+- [x] Reminder system: 7 days before event
+- [x] Reminder system: 1 day before event
+- [x] Integration with calendar auto-add (Google, Apple) - reminders in ICS feed
+- [x] Notification preferences UI in Settings
+
+## Bug Fixes
+- [x] Fix profile button in header (added to mobile header with ProfileSummary popup)
