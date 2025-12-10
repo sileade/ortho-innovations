@@ -1,220 +1,186 @@
-import { DashboardLayout } from "@/components/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useAuth } from "@/_core/hooks/useAuth";
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Calendar, 
-  Shield, 
-  Edit2, 
-  FileText,
-  Activity,
-  Award
-} from "lucide-react";
-
-const patientData = {
-  medicalId: "PT-2024-78542",
-  dateOfBirth: "March 15, 1975",
-  bloodType: "A+",
-  emergencyContact: "+971 50 987 6543",
-  emergencyName: "Sarah Johnson (Spouse)",
-  address: "456 Palm Jumeirah, Dubai, UAE",
-  insuranceProvider: "Emirates Insurance",
-  insuranceNumber: "EI-2024-456789",
-};
+import { AppLayout } from "@/components/AppLayout";
+import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Link } from "wouter";
+import { User, Mail, Phone, MapPin, Calendar, Heart, Shield, Award, ChevronRight, Edit2, CheckCircle2 } from "lucide-react";
 
 const achievements = [
-  { id: 1, name: "First Steps", description: "Completed first walking session", icon: "🚶", date: "Oct 20, 2024" },
-  { id: 2, name: "Week Warrior", description: "7-day exercise streak", icon: "🔥", date: "Nov 5, 2024" },
-  { id: 3, name: "Milestone Master", description: "Completed Phase 1 recovery", icon: "🏆", date: "Nov 25, 2024" },
-  { id: 4, name: "Knowledge Seeker", description: "Read 10 articles", icon: "📚", date: "Dec 1, 2024" },
-];
-
-const healthMetrics = [
-  { label: "Recovery Progress", value: "65%", trend: "+5% this week" },
-  { label: "Exercises Completed", value: "156", trend: "18 this week" },
-  { label: "Days Since Surgery", value: "56", trend: "" },
-  { label: "Next Appointment", value: "Dec 12", trend: "in 2 days" },
+  { id: 1, title: { ru: "Первые шаги", en: "First Steps" }, icon: "🚶", earned: true },
+  { id: 2, title: { ru: "7-дневная серия", en: "7-Day Streak" }, icon: "🔥", earned: true },
+  { id: 3, title: { ru: "100 упражнений", en: "100 Exercises" }, icon: "💪", earned: true },
+  { id: 4, title: { ru: "Месяц прогресса", en: "Month of Progress" }, icon: "📈", earned: false },
 ];
 
 export default function Profile() {
-  const { user } = useAuth();
+  const { t, language } = useLanguage();
 
   return (
-    <DashboardLayout>
-      <div className="space-y-8">
-        {/* Header */}
-        <div>
-          <h1 className="font-serif text-3xl font-semibold text-foreground">Profile</h1>
-          <p className="text-muted-foreground mt-1">Your personal information and health data</p>
-        </div>
-
-        {/* Profile Card */}
+    <AppLayout>
+      <div className="px-4 py-6 lg:px-8 lg:py-8 space-y-6 max-w-4xl mx-auto">
+        {/* Profile Header */}
         <Card className="border-none shadow-sm overflow-hidden">
-          <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-6">
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-              <Avatar className="w-24 h-24 border-4 border-background shadow-lg">
-                <AvatarImage src="" alt={user?.name || "Patient"} />
-                <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
-                  {user?.name?.charAt(0) || "P"}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 text-center md:text-left">
-                <h2 className="font-serif text-2xl font-semibold">{user?.name || "Patient Name"}</h2>
-                <p className="text-muted-foreground">Patient ID: {patientData.medicalId}</p>
-                <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-3">
-                  <Badge variant="secondary" className="gap-1">
-                    <Shield className="w-3 h-3" />
-                    Verified Patient
-                  </Badge>
-                  <Badge variant="outline">Total Knee Replacement</Badge>
-                </div>
+          <div className="h-24 bg-gradient-to-r from-primary to-primary/80" />
+          <CardContent className="p-4 lg:p-6 -mt-12">
+            <div className="flex flex-col lg:flex-row lg:items-end gap-4">
+              <div className="w-24 h-24 rounded-2xl bg-white dark:bg-gray-800 border-4 border-background shadow-lg flex items-center justify-center">
+                <User className="w-12 h-12 text-primary" />
               </div>
-              <Button variant="outline" className="gap-2">
-                <Edit2 className="w-4 h-4" />
-                Edit Profile
-              </Button>
-            </div>
-          </div>
-        </Card>
-
-        {/* Health Metrics */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {healthMetrics.map((metric, index) => (
-            <Card key={index} className="border-none shadow-sm">
-              <CardContent className="pt-6">
-                <p className="text-xs text-muted-foreground uppercase tracking-wider">{metric.label}</p>
-                <p className="text-2xl font-serif font-semibold mt-1">{metric.value}</p>
-                {metric.trend && (
-                  <p className="text-xs text-primary mt-1">{metric.trend}</p>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Main Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Personal Information */}
-          <Card className="border-none shadow-sm lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="text-base font-medium flex items-center gap-2">
-                <User className="w-4 h-4 text-primary" />
-                Personal Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                  <Mail className="w-4 h-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Email</p>
-                    <p className="text-sm">{user?.email || "patient@example.com"}</p>
-                  </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <h1 className="text-2xl font-bold">Alex Johnson</h1>
+                  <CheckCircle2 className="w-5 h-5 text-primary" />
                 </div>
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                  <Phone className="w-4 h-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Phone</p>
-                    <p className="text-sm">+971 50 123 4567</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                  <Calendar className="w-4 h-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Date of Birth</p>
-                    <p className="text-sm">{patientData.dateOfBirth}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                  <Activity className="w-4 h-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Blood Type</p>
-                    <p className="text-sm">{patientData.bloodType}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 md:col-span-2">
-                  <MapPin className="w-4 h-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Address</p>
-                    <p className="text-sm">{patientData.address}</p>
-                  </div>
-                </div>
+                <p className="text-muted-foreground">{t("profile.verifiedPatient")}</p>
               </div>
-
-              <div className="pt-4 border-t">
-                <h4 className="text-sm font-medium mb-3">Emergency Contact</h4>
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-red-50 dark:bg-red-950/20">
-                  <Phone className="w-4 h-4 text-red-500" />
-                  <div>
-                    <p className="text-sm font-medium">{patientData.emergencyName}</p>
-                    <p className="text-xs text-muted-foreground">{patientData.emergencyContact}</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Insurance */}
-          <Card className="border-none shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-base font-medium flex items-center gap-2">
-                <FileText className="w-4 h-4 text-primary" />
-                Insurance
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <p className="text-xs text-muted-foreground">Provider</p>
-                <p className="font-medium">{patientData.insuranceProvider}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Policy Number</p>
-                <p className="font-mono text-sm">{patientData.insuranceNumber}</p>
-              </div>
-              <div className="pt-2">
-                <Badge variant="secondary" className="gap-1">
-                  <Shield className="w-3 h-3" />
-                  Active Coverage
-                </Badge>
-              </div>
-              <Button variant="outline" className="w-full mt-4">
-                View Insurance Details
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Achievements */}
-        <Card className="border-none shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-base font-medium flex items-center gap-2">
-              <Award className="w-4 h-4 text-primary" />
-              Achievements
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {achievements.map((achievement) => (
-                <div 
-                  key={achievement.id}
-                  className="text-center p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
-                >
-                  <div className="text-3xl mb-2">{achievement.icon}</div>
-                  <h4 className="font-medium text-sm">{achievement.name}</h4>
-                  <p className="text-xs text-muted-foreground mt-1">{achievement.description}</p>
-                  <p className="text-xs text-primary mt-2">{achievement.date}</p>
-                </div>
-              ))}
+              <Link href="/settings">
+                <button className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-xl font-medium hover:bg-primary/20 transition-colors">
+                  <Edit2 className="w-4 h-4" />
+                  {t("profile.editProfile")}
+                </button>
+              </Link>
             </div>
           </CardContent>
         </Card>
+
+        {/* Recovery Progress */}
+        <Card className="border-none shadow-sm">
+          <CardContent className="p-4 lg:p-6">
+            <h2 className="font-bold text-lg mb-4">{t("profile.recoveryProgress")}</h2>
+            <div className="space-y-4">
+              <div>
+                <div className="flex justify-between text-sm mb-2">
+                  <span className="text-muted-foreground">{t("rehab.inProgress")}</span>
+                  <span className="font-semibold">65%</span>
+                </div>
+                <Progress value={65} className="h-2" />
+              </div>
+              <div className="grid grid-cols-3 gap-4 pt-2">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-primary">156</p>
+                  <p className="text-xs text-muted-foreground">{t("profile.exercisesCompleted")}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-primary">45</p>
+                  <p className="text-xs text-muted-foreground">{t("profile.daysSinceSurgery")}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-primary">2</p>
+                  <p className="text-xs text-muted-foreground">{t("profile.nextAppointment")} {t("profile.inDays", { days: 2 })}</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Personal Information */}
+          <Card className="border-none shadow-sm">
+            <CardContent className="p-4 lg:p-6">
+              <h2 className="font-bold text-lg mb-4">{t("profile.personalInfo")}</h2>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Mail className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">{t("profile.email")}</p>
+                    <p className="font-medium">alex.johnson@email.com</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Phone className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">{t("profile.phone")}</p>
+                    <p className="font-medium">+971 50 123 4567</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Calendar className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">{t("profile.dateOfBirth")}</p>
+                    <p className="font-medium">March 15, 1985</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Heart className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">{t("profile.bloodType")}</p>
+                    <p className="font-medium">A+</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <MapPin className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">{t("profile.address")}</p>
+                    <p className="font-medium">Dubai Marina, Dubai, UAE</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Insurance & Emergency */}
+          <div className="space-y-6">
+            {/* Insurance */}
+            <Card className="border-none shadow-sm">
+              <CardContent className="p-4 lg:p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="font-bold text-lg">{t("profile.insurance")}</h2>
+                  <Shield className="w-5 h-5 text-green-500" />
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-xs text-muted-foreground">{t("profile.provider")}</p>
+                    <p className="font-medium">Emirates Health Insurance</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">{t("profile.policyNumber")}</p>
+                    <p className="font-medium">EHI-2024-789456</p>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-green-600">
+                    <CheckCircle2 className="w-4 h-4" />
+                    {t("profile.activeCoverage")}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Achievements */}
+            <Card className="border-none shadow-sm">
+              <CardContent className="p-4 lg:p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="font-bold text-lg">{t("profile.achievements")}</h2>
+                  <Award className="w-5 h-5 text-yellow-500" />
+                </div>
+                <div className="grid grid-cols-4 gap-2">
+                  {achievements.map((achievement) => (
+                    <div
+                      key={achievement.id}
+                      className={`aspect-square rounded-xl flex flex-col items-center justify-center text-center p-2 ${
+                        achievement.earned
+                          ? 'bg-yellow-50 dark:bg-yellow-900/20'
+                          : 'bg-muted opacity-50'
+                      }`}
+                    >
+                      <span className="text-2xl mb-1">{achievement.icon}</span>
+                      <span className="text-[10px] font-medium line-clamp-2">{achievement.title[language]}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
-    </DashboardLayout>
+    </AppLayout>
   );
 }

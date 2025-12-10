@@ -1,221 +1,201 @@
-import { DashboardLayout } from "@/components/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { AppLayout } from "@/components/AppLayout";
+import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { useAuth } from "@/_core/hooks/useAuth";
-import { 
-  Bell, 
-  Lock, 
-  Globe, 
-  Moon, 
-  Smartphone, 
-  Mail, 
-  Shield,
-  LogOut,
-  ChevronRight,
-  HelpCircle,
-  FileText,
-  MessageSquare
-} from "lucide-react";
-import { useState } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useTheme } from "@/contexts/ThemeContext";
+import { Bell, Moon, Globe, Lock, HelpCircle, FileText, LogOut, ChevronRight, Mail, Smartphone, Dumbbell, Megaphone, Shield, Key } from "lucide-react";
 
 export default function Settings() {
-  const { logout } = useAuth();
-  const [notifications, setNotifications] = useState({
-    email: true,
-    push: true,
-    reminders: true,
-    updates: false,
-  });
+  const { t, language, setLanguage } = useLanguage();
+  const { theme, setTheme } = useTheme();
 
   return (
-    <DashboardLayout>
-      <div className="space-y-8">
-        {/* Header */}
-        <div>
-          <h1 className="font-serif text-3xl font-semibold text-foreground">Settings</h1>
-          <p className="text-muted-foreground mt-1">Manage your account preferences</p>
+    <AppLayout>
+      <div className="px-4 py-6 lg:px-8 lg:py-8 space-y-6 max-w-4xl mx-auto">
+        <div className="space-y-1">
+          <h1 className="text-2xl lg:text-3xl font-bold">{t("settings.title")}</h1>
+          <p className="text-muted-foreground text-sm lg:text-base">{t("settings.subtitle")}</p>
         </div>
 
         {/* Notifications */}
         <Card className="border-none shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-base font-medium flex items-center gap-2">
-              <Bell className="w-4 h-4 text-primary" />
-              Notifications
-            </CardTitle>
-            <CardDescription>Choose how you want to be notified</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between py-2">
-              <div className="flex items-center gap-3">
-                <Mail className="w-4 h-4 text-muted-foreground" />
-                <div>
-                  <Label htmlFor="email-notif" className="font-medium">Email Notifications</Label>
-                  <p className="text-xs text-muted-foreground">Receive updates via email</p>
-                </div>
+          <CardContent className="p-4 lg:p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Bell className="w-5 h-5 text-primary" />
               </div>
-              <Switch 
-                id="email-notif"
-                checked={notifications.email}
-                onCheckedChange={(checked) => setNotifications(prev => ({ ...prev, email: checked }))}
-              />
+              <div>
+                <h2 className="font-bold">{t("settings.notifications")}</h2>
+                <p className="text-sm text-muted-foreground">{t("settings.notificationsDesc")}</p>
+              </div>
             </div>
-            <div className="flex items-center justify-between py-2">
-              <div className="flex items-center gap-3">
-                <Smartphone className="w-4 h-4 text-muted-foreground" />
-                <div>
-                  <Label htmlFor="push-notif" className="font-medium">Push Notifications</Label>
-                  <p className="text-xs text-muted-foreground">Receive push notifications on your device</p>
+            <div className="space-y-4 pl-13">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Mail className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <p className="font-medium text-sm">{t("settings.emailNotif")}</p>
+                    <p className="text-xs text-muted-foreground">{t("settings.emailNotifDesc")}</p>
+                  </div>
                 </div>
+                <Switch defaultChecked />
               </div>
-              <Switch 
-                id="push-notif"
-                checked={notifications.push}
-                onCheckedChange={(checked) => setNotifications(prev => ({ ...prev, push: checked }))}
-              />
-            </div>
-            <div className="flex items-center justify-between py-2">
-              <div className="flex items-center gap-3">
-                <Bell className="w-4 h-4 text-muted-foreground" />
-                <div>
-                  <Label htmlFor="reminder-notif" className="font-medium">Exercise Reminders</Label>
-                  <p className="text-xs text-muted-foreground">Daily reminders for your exercises</p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Smartphone className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <p className="font-medium text-sm">{t("settings.pushNotif")}</p>
+                    <p className="text-xs text-muted-foreground">{t("settings.pushNotifDesc")}</p>
+                  </div>
                 </div>
+                <Switch defaultChecked />
               </div>
-              <Switch 
-                id="reminder-notif"
-                checked={notifications.reminders}
-                onCheckedChange={(checked) => setNotifications(prev => ({ ...prev, reminders: checked }))}
-              />
-            </div>
-            <div className="flex items-center justify-between py-2">
-              <div className="flex items-center gap-3">
-                <Globe className="w-4 h-4 text-muted-foreground" />
-                <div>
-                  <Label htmlFor="update-notif" className="font-medium">Product Updates</Label>
-                  <p className="text-xs text-muted-foreground">News and feature announcements</p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Dumbbell className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <p className="font-medium text-sm">{t("settings.reminders")}</p>
+                    <p className="text-xs text-muted-foreground">{t("settings.remindersDesc")}</p>
+                  </div>
                 </div>
+                <Switch defaultChecked />
               </div>
-              <Switch 
-                id="update-notif"
-                checked={notifications.updates}
-                onCheckedChange={(checked) => setNotifications(prev => ({ ...prev, updates: checked }))}
-              />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Megaphone className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <p className="font-medium text-sm">{t("settings.updates")}</p>
+                    <p className="text-xs text-muted-foreground">{t("settings.updatesDesc")}</p>
+                  </div>
+                </div>
+                <Switch />
+              </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Appearance */}
         <Card className="border-none shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-base font-medium flex items-center gap-2">
-              <Moon className="w-4 h-4 text-primary" />
-              Appearance
-            </CardTitle>
-            <CardDescription>Customize how the app looks</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between py-2">
-              <div className="flex items-center gap-3">
-                <Moon className="w-4 h-4 text-muted-foreground" />
-                <div>
-                  <Label className="font-medium">Dark Mode</Label>
-                  <p className="text-xs text-muted-foreground">Use dark theme</p>
+          <CardContent className="p-4 lg:p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Moon className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="font-bold">{t("settings.appearance")}</h2>
+                <p className="text-sm text-muted-foreground">{t("settings.appearanceDesc")}</p>
+              </div>
+            </div>
+            <div className="space-y-4 pl-13">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Moon className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <p className="font-medium text-sm">{t("settings.darkMode")}</p>
+                    <p className="text-xs text-muted-foreground">{t("settings.darkModeDesc")}</p>
+                  </div>
+                </div>
+                <Switch checked={theme === "dark"} onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")} />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Globe className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <p className="font-medium text-sm">{t("settings.language")}</p>
+                    <p className="text-xs text-muted-foreground">{t("settings.languageDesc")}</p>
+                  </div>
+                </div>
+                <div className="flex gap-1 bg-muted rounded-lg p-1">
+                  <button onClick={() => setLanguage("ru")} className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${language === "ru" ? 'bg-background shadow-sm' : 'text-muted-foreground'}`}>
+                    RU
+                  </button>
+                  <button onClick={() => setLanguage("en")} className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${language === "en" ? 'bg-background shadow-sm' : 'text-muted-foreground'}`}>
+                    EN
+                  </button>
                 </div>
               </div>
-              <Switch />
             </div>
           </CardContent>
         </Card>
 
         {/* Security */}
         <Card className="border-none shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-base font-medium flex items-center gap-2">
-              <Lock className="w-4 h-4 text-primary" />
-              Security
-            </CardTitle>
-            <CardDescription>Manage your security settings</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors text-left">
-              <div className="flex items-center gap-3">
-                <Lock className="w-4 h-4 text-muted-foreground" />
-                <div>
-                  <p className="font-medium text-sm">Change Password</p>
-                  <p className="text-xs text-muted-foreground">Update your password</p>
-                </div>
+          <CardContent className="p-4 lg:p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Lock className="w-5 h-5 text-primary" />
               </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            </button>
-            <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors text-left">
-              <div className="flex items-center gap-3">
-                <Shield className="w-4 h-4 text-muted-foreground" />
-                <div>
-                  <p className="font-medium text-sm">Two-Factor Authentication</p>
-                  <p className="text-xs text-muted-foreground">Add an extra layer of security</p>
-                </div>
+              <div>
+                <h2 className="font-bold">{t("settings.security")}</h2>
+                <p className="text-sm text-muted-foreground">{t("settings.securityDesc")}</p>
               </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            </button>
+            </div>
+            <div className="space-y-2 pl-13">
+              <button className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-muted transition-colors">
+                <div className="flex items-center gap-3">
+                  <Key className="w-5 h-5 text-muted-foreground" />
+                  <div className="text-left">
+                    <p className="font-medium text-sm">{t("settings.changePassword")}</p>
+                    <p className="text-xs text-muted-foreground">{t("settings.changePasswordDesc")}</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-muted-foreground" />
+              </button>
+              <button className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-muted transition-colors">
+                <div className="flex items-center gap-3">
+                  <Shield className="w-5 h-5 text-muted-foreground" />
+                  <div className="text-left">
+                    <p className="font-medium text-sm">{t("settings.twoFactor")}</p>
+                    <p className="text-xs text-muted-foreground">{t("settings.twoFactorDesc")}</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-muted-foreground" />
+              </button>
+            </div>
           </CardContent>
         </Card>
 
         {/* Support */}
         <Card className="border-none shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-base font-medium flex items-center gap-2">
-              <HelpCircle className="w-4 h-4 text-primary" />
-              Support
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors text-left">
-              <div className="flex items-center gap-3">
-                <HelpCircle className="w-4 h-4 text-muted-foreground" />
-                <span className="font-medium text-sm">Help Center</span>
-              </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            </button>
-            <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors text-left">
-              <div className="flex items-center gap-3">
-                <MessageSquare className="w-4 h-4 text-muted-foreground" />
-                <span className="font-medium text-sm">Contact Support</span>
-              </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            </button>
-            <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors text-left">
-              <div className="flex items-center gap-3">
-                <FileText className="w-4 h-4 text-muted-foreground" />
-                <span className="font-medium text-sm">Terms & Privacy Policy</span>
-              </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            </button>
+          <CardContent className="p-4 lg:p-6">
+            <h2 className="font-bold mb-4">{t("settings.support")}</h2>
+            <div className="space-y-2">
+              <button className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-muted transition-colors">
+                <div className="flex items-center gap-3">
+                  <HelpCircle className="w-5 h-5 text-muted-foreground" />
+                  <span className="font-medium text-sm">{t("settings.helpCenter")}</span>
+                </div>
+                <ChevronRight className="w-5 h-5 text-muted-foreground" />
+              </button>
+              <button className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-muted transition-colors">
+                <div className="flex items-center gap-3">
+                  <Mail className="w-5 h-5 text-muted-foreground" />
+                  <span className="font-medium text-sm">{t("settings.contactSupport")}</span>
+                </div>
+                <ChevronRight className="w-5 h-5 text-muted-foreground" />
+              </button>
+              <button className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-muted transition-colors">
+                <div className="flex items-center gap-3">
+                  <FileText className="w-5 h-5 text-muted-foreground" />
+                  <span className="font-medium text-sm">{t("settings.terms")}</span>
+                </div>
+                <ChevronRight className="w-5 h-5 text-muted-foreground" />
+              </button>
+            </div>
           </CardContent>
         </Card>
 
-        {/* Logout */}
-        <Card className="border-none shadow-sm">
-          <CardContent className="pt-6">
-            <Button 
-              variant="destructive" 
-              className="w-full gap-2"
-              onClick={() => logout()}
-            >
-              <LogOut className="w-4 h-4" />
-              Sign Out
-            </Button>
-          </CardContent>
-        </Card>
+        {/* Sign Out */}
+        <button className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-red-50 dark:bg-red-950/20 text-red-600 font-medium hover:bg-red-100 dark:hover:bg-red-950/30 transition-colors">
+          <LogOut className="w-5 h-5" />
+          {t("settings.signOut")}
+        </button>
 
-        {/* App Info */}
-        <div className="text-center text-xs text-muted-foreground">
-          <p>Ortho Innovations Patient App</p>
-          <p>Version 1.0.0</p>
-        </div>
+        {/* Version */}
+        <p className="text-center text-sm text-muted-foreground">
+          {t("settings.version")} 1.0.0
+        </p>
       </div>
-    </DashboardLayout>
+    </AppLayout>
   );
 }

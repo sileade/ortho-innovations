@@ -1,216 +1,210 @@
-import { DashboardLayout } from "@/components/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AppLayout } from "@/components/AppLayout";
+import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { CheckCircle2, Circle, Clock, PlayCircle, Calendar, ChevronRight } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Link } from "wouter";
+import { 
+  CheckCircle2, 
+  Clock, 
+  Play, 
+  ChevronRight,
+  Trophy,
+  Flame,
+  Calendar,
+  Target
+} from "lucide-react";
 
 const phases = [
-  {
-    id: 1,
-    name: "Early Recovery",
-    duration: "Weeks 1-6",
-    status: "completed",
-    progress: 100,
-    tasks: 12,
-    completedTasks: 12,
-  },
-  {
-    id: 2,
-    name: "Strengthening",
-    duration: "Weeks 7-12",
-    status: "current",
-    progress: 65,
-    tasks: 18,
-    completedTasks: 12,
-  },
-  {
-    id: 3,
-    name: "Advanced Mobility",
-    duration: "Weeks 13-24",
-    status: "upcoming",
-    progress: 0,
-    tasks: 24,
-    completedTasks: 0,
-  },
-  {
-    id: 4,
-    name: "Return to Activity",
-    duration: "Month 6-12",
-    status: "upcoming",
-    progress: 0,
-    tasks: 20,
-    completedTasks: 0,
-  },
+  { id: 1, title: { ru: "Начальное восстановление", en: "Initial Recovery" }, status: "completed", progress: 100, tasks: 12 },
+  { id: 2, title: { ru: "Укрепление мышц", en: "Muscle Strengthening" }, status: "completed", progress: 100, tasks: 18 },
+  { id: 3, title: { ru: "Тренировка походки", en: "Gait Training" }, status: "in-progress", progress: 65, tasks: 24 },
+  { id: 4, title: { ru: "Продвинутая мобильность", en: "Advanced Mobility" }, status: "upcoming", progress: 0, tasks: 20 },
 ];
 
 const todaysTasks = [
-  { id: 1, title: "Morning stretching routine", duration: "15 min", completed: true, type: "exercise" },
-  { id: 2, title: "Quad strengthening exercises", duration: "20 min", completed: true, type: "exercise" },
-  { id: 3, title: "Ice therapy", duration: "15 min", completed: false, type: "therapy" },
-  { id: 4, title: "Evening walk", duration: "30 min", completed: false, type: "activity" },
-  { id: 5, title: "Range of motion exercises", duration: "10 min", completed: false, type: "exercise" },
+  { id: 1, title: { ru: "Утренняя растяжка", en: "Morning Stretch" }, duration: "15", completed: true, type: "exercise" },
+  { id: 2, title: { ru: "Укрепление квадрицепса", en: "Quad Strengthening" }, duration: "20", completed: true, type: "exercise" },
+  { id: 3, title: { ru: "Тренировка баланса", en: "Balance Training" }, duration: "15", completed: false, type: "exercise" },
+  { id: 4, title: { ru: "Ледяная терапия", en: "Ice Therapy" }, duration: "15", completed: false, type: "therapy" },
+  { id: 5, title: { ru: "Вечерняя прогулка", en: "Evening Walk" }, duration: "30", completed: false, type: "cardio" },
 ];
 
-const upcomingAppointments = [
-  { id: 1, title: "Physical Therapy Session", date: "Dec 12, 2025", time: "10:00 AM", doctor: "Dr. Smith" },
-  { id: 2, title: "Progress Check-up", date: "Dec 18, 2025", time: "2:30 PM", doctor: "Dr. Johnson" },
+const appointments = [
+  { id: 1, title: { ru: "Осмотр у Dr. Smith", en: "Check-up with Dr. Smith" }, date: "Dec 11", time: "10:00 AM" },
+  { id: 2, title: { ru: "Физиотерапия", en: "Physical Therapy" }, date: "Dec 13", time: "2:00 PM" },
 ];
 
 export default function Rehabilitation() {
-  const completedToday = todaysTasks.filter(t => t.completed).length;
-  const totalToday = todaysTasks.length;
+  const { t, language } = useLanguage();
+  const completedTasks = todaysTasks.filter(task => task.completed).length;
+  const totalTasks = todaysTasks.length;
+  const progressPercent = Math.round((completedTasks / totalTasks) * 100);
 
   return (
-    <DashboardLayout>
-      <div className="space-y-8">
+    <AppLayout>
+      <div className="px-4 py-6 lg:px-8 lg:py-8 space-y-6 lg:space-y-8 max-w-6xl mx-auto">
         {/* Header */}
-        <div>
-          <h1 className="font-serif text-3xl font-semibold text-foreground">Rehabilitation Plan</h1>
-          <p className="text-muted-foreground mt-1">Your personalized recovery journey</p>
+        <div className="space-y-1">
+          <h1 className="text-2xl lg:text-3xl font-bold">{t("rehab.title")}</h1>
+          <p className="text-muted-foreground text-sm lg:text-base">{t("rehab.subtitle")}</p>
         </div>
 
-        {/* Today's Progress */}
-        <Card className="border-none shadow-sm bg-gradient-to-r from-primary/5 to-transparent">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="font-medium text-lg">Today's Progress</h3>
-                <p className="text-sm text-muted-foreground">{completedToday} of {totalToday} tasks completed</p>
+        {/* Stats Row */}
+        <div className="grid grid-cols-3 gap-3 lg:gap-4">
+          <Card className="border-none shadow-sm">
+            <CardContent className="p-4 text-center">
+              <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-2">
+                <Trophy className="w-5 h-5 lg:w-6 lg:h-6 text-primary" />
               </div>
-              <div className="text-3xl font-serif font-semibold text-primary">
-                {Math.round((completedToday / totalToday) * 100)}%
-              </div>
-            </div>
-            <Progress value={(completedToday / totalToday) * 100} className="h-2" />
-          </CardContent>
-        </Card>
+              <p className="text-xl lg:text-2xl font-bold">156</p>
+              <p className="text-xs lg:text-sm text-muted-foreground">{t("rehab.exercisesCompleted")}</p>
+            </CardContent>
+          </Card>
 
-        {/* Main Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="border-none shadow-sm">
+            <CardContent className="p-4 text-center">
+              <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-accent/10 flex items-center justify-center mx-auto mb-2">
+                <Clock className="w-5 h-5 lg:w-6 lg:h-6 text-accent" />
+              </div>
+              <p className="text-xl lg:text-2xl font-bold">2,340</p>
+              <p className="text-xs lg:text-sm text-muted-foreground">{t("rehab.activeMinutes")}</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-sm">
+            <CardContent className="p-4 text-center">
+              <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center mx-auto mb-2">
+                <Flame className="w-5 h-5 lg:w-6 lg:h-6 text-orange-500" />
+              </div>
+              <p className="text-xl lg:text-2xl font-bold">12</p>
+              <p className="text-xs lg:text-sm text-muted-foreground">{t("rehab.streak")} {t("rehab.days")}</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Today's Tasks */}
           <div className="lg:col-span-2 space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="font-serif text-xl font-semibold">Today's Tasks</h2>
-              <Button variant="ghost" size="sm" className="text-muted-foreground">
-                View all <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
-            </div>
-            
-            <div className="space-y-2">
-              {todaysTasks.map((task) => (
-                <Card key={task.id} className={`border-none shadow-sm transition-all hover:shadow-md ${task.completed ? 'bg-muted/30' : ''}`}>
-                  <CardContent className="py-4 flex items-center gap-4">
-                    <button className="flex-shrink-0">
-                      {task.completed ? (
-                        <CheckCircle2 className="w-5 h-5 text-primary" />
-                      ) : (
-                        <Circle className="w-5 h-5 text-muted-foreground/50" />
-                      )}
-                    </button>
-                    <div className="flex-1 min-w-0">
-                      <p className={`font-medium ${task.completed ? 'line-through text-muted-foreground' : ''}`}>
-                        {task.title}
-                      </p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Clock className="w-3 h-3 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">{task.duration}</span>
-                        <Badge variant="secondary" className="text-xs capitalize">
-                          {task.type}
-                        </Badge>
+            {/* Progress Card */}
+            <Card className="border-none shadow-sm bg-gradient-to-br from-primary/10 to-primary/5">
+              <CardContent className="p-4 lg:p-6">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Target className="w-5 h-5 text-primary" />
+                    <span className="font-semibold">{t("rehab.todaysProgress")}</span>
+                  </div>
+                  <span className="text-2xl font-bold text-primary">{progressPercent}%</span>
+                </div>
+                <Progress value={progressPercent} className="h-2 mb-2" />
+                <p className="text-sm text-muted-foreground">
+                  {completedTasks}/{totalTasks} {t("rehab.tasksCompleted")}
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Tasks List */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h2 className="font-bold text-lg">{t("rehab.todaysTasks")}</h2>
+              </div>
+
+              <div className="space-y-2">
+                {todaysTasks.map((task) => (
+                  <Card 
+                    key={task.id} 
+                    className={`border-none shadow-sm card-interactive ${task.completed ? 'bg-muted/50' : ''}`}
+                  >
+                    <CardContent className="p-3 lg:p-4 flex items-center gap-3">
+                      <div className={`w-10 h-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center ${
+                        task.completed 
+                          ? 'bg-primary/10' 
+                          : 'bg-accent/10'
+                      }`}>
+                        {task.completed ? (
+                          <CheckCircle2 className="w-5 h-5 lg:w-6 lg:h-6 text-primary" />
+                        ) : (
+                          <Play className="w-5 h-5 lg:w-6 lg:h-6 text-accent" />
+                        )}
                       </div>
-                    </div>
-                    {!task.completed && task.type === 'exercise' && (
-                      <Button size="sm" variant="outline" className="gap-1">
-                        <PlayCircle className="w-4 h-4" />
-                        Start
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
+                      <div className="flex-1 min-w-0">
+                        <p className={`font-medium ${task.completed ? 'line-through text-muted-foreground' : ''}`}>
+                          {task.title[language]}
+                        </p>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <Clock className="w-3 h-3" />
+                          {task.duration} {t("common.min")}
+                        </div>
+                      </div>
+                      {!task.completed && (
+                        <button className="px-4 py-2 bg-accent text-accent-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
+                          {t("rehab.start")}
+                        </button>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Sidebar */}
+          {/* Sidebar Content */}
           <div className="space-y-6">
             {/* Upcoming Appointments */}
-            <Card className="border-none shadow-sm">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base font-medium flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-primary" />
-                  Upcoming Appointments
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {upcomingAppointments.map((apt) => (
-                  <div key={apt.id} className="p-3 rounded-lg bg-muted/30">
-                    <p className="font-medium text-sm">{apt.title}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{apt.date} at {apt.time}</p>
-                    <p className="text-xs text-primary mt-1">{apt.doctor}</p>
-                  </div>
+            <div className="space-y-3">
+              <h2 className="font-bold text-lg">{t("rehab.upcomingAppointments")}</h2>
+              <div className="space-y-2">
+                {appointments.map((apt) => (
+                  <Card key={apt.id} className="border-none shadow-sm card-interactive">
+                    <CardContent className="p-4 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <Calendar className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm">{apt.title[language]}</p>
+                        <p className="text-xs text-muted-foreground">{apt.date} · {apt.time}</p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                    </CardContent>
+                  </Card>
                 ))}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
-            {/* Quick Stats */}
-            <Card className="border-none shadow-sm">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base font-medium">This Week</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Exercises completed</span>
-                  <span className="font-semibold">18/24</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Active minutes</span>
-                  <span className="font-semibold">145 min</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Streak</span>
-                  <span className="font-semibold text-primary">🔥 7 days</span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Recovery Phases */}
-        <div className="space-y-4">
-          <h2 className="font-serif text-xl font-semibold">Recovery Phases</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {phases.map((phase) => (
-              <Card 
-                key={phase.id} 
-                className={`border-none shadow-sm transition-all hover:shadow-md ${
-                  phase.status === 'current' ? 'ring-2 ring-primary/20' : ''
-                }`}
-              >
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge 
-                      variant={phase.status === 'completed' ? 'default' : phase.status === 'current' ? 'secondary' : 'outline'}
-                      className="text-xs"
-                    >
-                      {phase.status === 'completed' ? '✓ Completed' : phase.status === 'current' ? 'In Progress' : 'Upcoming'}
-                    </Badge>
-                  </div>
-                  <h3 className="font-medium mt-2">{phase.name}</h3>
-                  <p className="text-xs text-muted-foreground">{phase.duration}</p>
-                  <div className="mt-4">
-                    <div className="flex justify-between text-xs mb-1">
-                      <span className="text-muted-foreground">{phase.completedTasks}/{phase.tasks} tasks</span>
-                      <span className="font-medium">{phase.progress}%</span>
-                    </div>
-                    <Progress value={phase.progress} className="h-1.5" />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            {/* Recovery Phases */}
+            <div className="space-y-3">
+              <h2 className="font-bold text-lg">{t("rehab.recoveryPhases")}</h2>
+              <div className="space-y-2">
+                {phases.map((phase) => (
+                  <Card 
+                    key={phase.id} 
+                    className={`border-none shadow-sm ${phase.status === 'in-progress' ? 'ring-2 ring-primary' : ''}`}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="font-medium text-sm">{phase.title[language]}</p>
+                        <span className={`text-xs px-2 py-1 rounded-full ${
+                          phase.status === 'completed' 
+                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                            : phase.status === 'in-progress'
+                            ? 'bg-primary/10 text-primary'
+                            : 'bg-muted text-muted-foreground'
+                        }`}>
+                          {phase.status === 'completed' ? t("rehab.completed") : 
+                           phase.status === 'in-progress' ? t("rehab.inProgress") : 
+                           t("rehab.upcoming")}
+                        </span>
+                      </div>
+                      <Progress value={phase.progress} className="h-1.5 mb-1" />
+                      <p className="text-xs text-muted-foreground">{phase.tasks} {t("rehab.tasks")}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </AppLayout>
   );
 }

@@ -38,3 +38,25 @@
 ## Documentation
 - [ ] Update README.md version
 - [ ] Create deployment guide for Debian 13
+
+## Mobile Redesign (orthoinnovations.ae style)
+- [x] Analyze orthoinnovations.ae color scheme and design
+- [x] Update color palette to match orthoinnovations.ae
+- [x] Create mobile-first bottom navigation
+- [x] Redesign Dashboard for mobile
+- [x] Redesign Rehabilitation page for mobile
+- [x] Redesign Knowledge Base page for mobile
+- [x] Redesign Prosthesis page for mobile
+- [x] Redesign Service page for mobile
+- [x] Redesign Profile page for mobile
+- [x] Redesign Settings page for mobile
+- [x] Make all blocks clickable with proper navigation
+- [x] Add Russian language support
+- [x] Add language switcher (RU/EN)
+
+## Additional UX Requirements
+- [x] Add dark/light theme switcher
+- [x] Make layout responsive (mobile + desktop)
+- [x] Desktop: sidebar navigation
+- [x] Mobile: bottom navigation
+- [x] Adaptive breakpoints for all pages

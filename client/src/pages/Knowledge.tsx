@@ -1,176 +1,85 @@
-import { DashboardLayout } from "@/components/DashboardLayout";
+import { AppLayout } from "@/components/AppLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Search, BookOpen, Video, FileText, ChevronRight, Clock, Eye } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useState } from "react";
+import { Search, Play, BookOpen, Clock, ChevronRight, Star } from "lucide-react";
 
 const categories = [
-  { id: "all", name: "All", count: 24 },
-  { id: "exercises", name: "Exercises", count: 12 },
-  { id: "nutrition", name: "Nutrition", count: 5 },
-  { id: "recovery", name: "Recovery Tips", count: 4 },
-  { id: "faq", name: "FAQ", count: 3 },
+  { id: "all", labelKey: "knowledge.all" },
+  { id: "exercises", labelKey: "knowledge.exercises" },
+  { id: "nutrition", labelKey: "knowledge.nutrition" },
+  { id: "recovery", labelKey: "knowledge.recovery" },
+  { id: "faq", labelKey: "knowledge.faq" },
 ];
 
 const articles = [
-  {
-    id: 1,
-    title: "Post-Surgery Exercise Guide",
-    description: "Complete guide to safe exercises after knee replacement surgery",
-    category: "exercises",
-    type: "video",
-    duration: "15 min",
-    views: 1234,
-    featured: true,
-    thumbnail: "🏃",
-  },
-  {
-    id: 2,
-    title: "Nutrition for Recovery",
-    description: "Essential nutrients and diet tips to speed up your healing process",
-    category: "nutrition",
-    type: "article",
-    duration: "8 min read",
-    views: 856,
-    featured: true,
-    thumbnail: "🥗",
-  },
-  {
-    id: 3,
-    title: "Managing Post-Op Pain",
-    description: "Effective strategies for pain management during recovery",
-    category: "recovery",
-    type: "article",
-    duration: "5 min read",
-    views: 2341,
-    featured: false,
-    thumbnail: "💊",
-  },
-  {
-    id: 4,
-    title: "Quad Strengthening Exercises",
-    description: "Video tutorial for building quadriceps strength safely",
-    category: "exercises",
-    type: "video",
-    duration: "12 min",
-    views: 1567,
-    featured: false,
-    thumbnail: "💪",
-  },
-  {
-    id: 5,
-    title: "Sleep Positions After Surgery",
-    description: "Best sleeping positions to protect your new joint",
-    category: "recovery",
-    type: "article",
-    duration: "4 min read",
-    views: 3210,
-    featured: false,
-    thumbnail: "😴",
-  },
-  {
-    id: 6,
-    title: "When to Call Your Doctor",
-    description: "Warning signs and symptoms that require medical attention",
-    category: "faq",
-    type: "article",
-    duration: "3 min read",
-    views: 4521,
-    featured: true,
-    thumbnail: "🏥",
-  },
-  {
-    id: 7,
-    title: "Range of Motion Exercises",
-    description: "Daily exercises to improve flexibility and joint mobility",
-    category: "exercises",
-    type: "video",
-    duration: "18 min",
-    views: 987,
-    featured: false,
-    thumbnail: "🧘",
-  },
-  {
-    id: 8,
-    title: "Hydration and Recovery",
-    description: "Why staying hydrated is crucial for your healing journey",
-    category: "nutrition",
-    type: "article",
-    duration: "4 min read",
-    views: 654,
-    featured: false,
-    thumbnail: "💧",
-  },
+  { id: 1, title: { ru: "Упражнения для укрепления квадрицепса", en: "Quadriceps Strengthening Exercises" }, description: { ru: "Пошаговое руководство по упражнениям", en: "Step-by-step guide to essential exercises" }, category: "exercises", type: "video", duration: "12", featured: true, image: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400" },
+  { id: 2, title: { ru: "Питание для восстановления", en: "Nutrition for Recovery" }, description: { ru: "Продукты, способствующие заживлению", en: "Foods that promote healing and recovery" }, category: "nutrition", type: "article", duration: "8", featured: true, image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400" },
+  { id: 3, title: { ru: "Понимание фантомных ощущений", en: "Understanding Phantom Sensations" }, description: { ru: "Что это такое и как с ними справляться", en: "What they are and how to manage them" }, category: "recovery", type: "article", duration: "10", featured: false, image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400" },
+  { id: 4, title: { ru: "Тренировка баланса", en: "Balance Training Basics" }, description: { ru: "Основы для начинающих", en: "Foundation exercises for beginners" }, category: "exercises", type: "video", duration: "15", featured: false, image: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=400" },
+  { id: 5, title: { ru: "Уход за протезом", en: "Prosthesis Care Guide" }, description: { ru: "Ежедневное обслуживание и уход", en: "Daily maintenance and care tips" }, category: "recovery", type: "article", duration: "6", featured: false, image: "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=400" },
 ];
 
 export default function Knowledge() {
-  const [activeCategory, setActiveCategory] = useState("all");
+  const { t, language } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeCategory, setActiveCategory] = useState("all");
 
-  const filteredArticles = articles.filter((article) => {
+  const filteredArticles = articles.filter(article => {
     const matchesCategory = activeCategory === "all" || article.category === activeCategory;
-    const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      article.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = searchQuery === "" || article.title[language].toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
   const featuredArticles = articles.filter(a => a.featured);
 
   return (
-    <DashboardLayout>
-      <div className="space-y-8">
-        {/* Header */}
-        <div>
-          <h1 className="font-serif text-3xl font-semibold text-foreground">Knowledge Base</h1>
-          <p className="text-muted-foreground mt-1">Educational resources for your recovery</p>
+    <AppLayout>
+      <div className="px-4 py-6 lg:px-8 lg:py-8 space-y-6 max-w-6xl mx-auto">
+        <div className="space-y-1">
+          <h1 className="text-2xl lg:text-3xl font-bold">{t("knowledge.title")}</h1>
+          <p className="text-muted-foreground text-sm lg:text-base">{t("knowledge.subtitle")}</p>
         </div>
 
-        {/* Search */}
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Search articles and videos..."
-            className="pl-10 bg-background border-muted"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+          <Input placeholder={t("knowledge.search")} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10 h-12" />
         </div>
 
-        {/* Featured Section */}
-        {!searchQuery && activeCategory === "all" && (
-          <div className="space-y-4">
-            <h2 className="font-serif text-xl font-semibold">Featured</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 lg:mx-0 lg:px-0 lg:flex-wrap">
+          {categories.map((cat) => (
+            <button key={cat.id} onClick={() => setActiveCategory(cat.id)} className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${activeCategory === cat.id ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}>
+              {t(cat.labelKey)}
+            </button>
+          ))}
+        </div>
+
+        {activeCategory === "all" && searchQuery === "" && (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Star className="w-5 h-5 text-yellow-500" />
+              <h2 className="font-bold text-lg">{t("knowledge.featured")}</h2>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {featuredArticles.map((article) => (
-                <Card 
-                  key={article.id} 
-                  className="border-none shadow-sm hover:shadow-md transition-all cursor-pointer group"
-                >
-                  <CardContent className="pt-6">
-                    <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-2xl flex-shrink-0">
-                        {article.thumbnail}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          {article.type === "video" ? (
-                            <Video className="w-3 h-3 text-primary" />
-                          ) : (
-                            <FileText className="w-3 h-3 text-primary" />
-                          )}
-                          <span className="text-xs text-muted-foreground capitalize">{article.type}</span>
-                        </div>
-                        <h3 className="font-medium text-sm group-hover:text-primary transition-colors line-clamp-2">
-                          {article.title}
-                        </h3>
-                        <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            {article.duration}
-                          </span>
+                <Card key={article.id} className="border-none shadow-sm card-interactive overflow-hidden">
+                  <div className="aspect-video relative">
+                    <img src={article.image} alt={article.title[language]} className="w-full h-full object-cover" />
+                    {article.type === "video" && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                        <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center">
+                          <Play className="w-6 h-6 text-primary ml-1" />
                         </div>
                       </div>
+                    )}
+                  </div>
+                  <CardContent className="p-4">
+                    <h3 className="font-semibold mb-1">{article.title[language]}</h3>
+                    <p className="text-sm text-muted-foreground mb-2">{article.description[language]}</p>
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Clock className="w-3 h-3" />
+                      {article.duration} {t("knowledge.min")}
                     </div>
                   </CardContent>
                 </Card>
@@ -179,91 +88,37 @@ export default function Knowledge() {
           </div>
         )}
 
-        {/* Categories */}
-        <div className="flex flex-wrap gap-2">
-          {categories.map((category) => (
-            <button
-              key={category.id}
-              onClick={() => setActiveCategory(category.id)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                activeCategory === category.id
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
-            >
-              {category.name}
-              <span className="ml-1.5 opacity-70">({category.count})</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Articles Grid */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="font-serif text-xl font-semibold">
-              {activeCategory === "all" ? "All Resources" : categories.find(c => c.id === activeCategory)?.name}
-            </h2>
-            <span className="text-sm text-muted-foreground">{filteredArticles.length} items</span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredArticles.map((article) => (
-              <Card 
-                key={article.id} 
-                className="border-none shadow-sm hover:shadow-md transition-all cursor-pointer group"
-              >
-                <CardContent className="py-5 flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-lg bg-muted/50 flex items-center justify-center text-2xl flex-shrink-0">
-                    {article.thumbnail}
+        <div className="space-y-3">
+          <h2 className="font-bold text-lg">{t("knowledge.allResources")}</h2>
+          <div className="space-y-2">
+            {filteredArticles.length > 0 ? filteredArticles.map((article) => (
+              <Card key={article.id} className="border-none shadow-sm card-interactive">
+                <CardContent className="p-3 lg:p-4 flex items-center gap-3">
+                  <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-xl overflow-hidden flex-shrink-0">
+                    <img src={article.image} alt={article.title[language]} className="w-full h-full object-cover" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      {article.type === "video" ? (
-                        <Badge variant="secondary" className="text-xs gap-1">
-                          <Video className="w-3 h-3" />
-                          Video
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="text-xs gap-1">
-                          <BookOpen className="w-3 h-3" />
-                          Article
-                        </Badge>
-                      )}
-                      <Badge variant="outline" className="text-xs capitalize">
-                        {article.category}
-                      </Badge>
-                    </div>
-                    <h3 className="font-medium group-hover:text-primary transition-colors line-clamp-1">
-                      {article.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground line-clamp-1 mt-0.5">
-                      {article.description}
-                    </p>
-                    <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {article.duration}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Eye className="w-3 h-3" />
-                        {article.views.toLocaleString()}
-                      </span>
+                    <span className={`px-2 py-0.5 rounded text-xs font-medium ${article.type === "video" ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'bg-primary/10 text-primary'}`}>
+                      {article.type === "video" ? t("knowledge.video") : t("knowledge.article")}
+                    </span>
+                    <h3 className="font-medium text-sm lg:text-base line-clamp-1 mt-1">{article.title[language]}</h3>
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                      <Clock className="w-3 h-3" />
+                      {article.duration} {t("knowledge.min")}
                     </div>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-muted-foreground/50 group-hover:text-primary transition-colors flex-shrink-0" />
+                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
                 </CardContent>
               </Card>
-            ))}
+            )) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                <p>{t("knowledge.noResults")}</p>
+              </div>
+            )}
           </div>
-
-          {filteredArticles.length === 0 && (
-            <div className="text-center py-12">
-              <BookOpen className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-              <p className="text-muted-foreground">No articles found matching your search.</p>
-            </div>
-          )}
         </div>
       </div>
-    </DashboardLayout>
+    </AppLayout>
   );
 }

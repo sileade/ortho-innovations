@@ -1,300 +1,155 @@
-import { DashboardLayout } from "@/components/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Wrench, 
-  Calendar, 
-  Clock, 
-  MapPin, 
-  Phone, 
-  MessageSquare, 
-  Plus,
-  CheckCircle2,
-  AlertCircle,
-  Loader2,
-  ChevronRight
-} from "lucide-react";
-
-const serviceRequests = [
-  {
-    id: 1,
-    type: "Adjustment",
-    description: "Minor discomfort during extended walking",
-    status: "in_progress",
-    createdAt: "Dec 5, 2024",
-    scheduledDate: "Dec 12, 2024",
-    technician: "Dr. Maria Santos",
-  },
-  {
-    id: 2,
-    type: "Check-up",
-    description: "Routine 6-month maintenance check",
-    status: "scheduled",
-    createdAt: "Nov 28, 2024",
-    scheduledDate: "Dec 18, 2024",
-    technician: "Dr. Alexander Petrov",
-  },
-  {
-    id: 3,
-    type: "Consultation",
-    description: "Questions about physical activity limitations",
-    status: "completed",
-    createdAt: "Nov 15, 2024",
-    completedAt: "Nov 20, 2024",
-    technician: "Dr. Elena Volkov",
-  },
-];
+import { AppLayout } from "@/components/AppLayout";
+import { Card, CardContent } from "@/components/ui/card";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useState } from "react";
+import { Plus, Wrench, Calendar, CheckCircle2, Clock, MapPin, Phone, MessageCircle, Navigation, ChevronRight } from "lucide-react";
 
 const serviceTypes = [
-  {
-    id: 1,
-    name: "Adjustment",
-    description: "Fine-tuning and comfort optimization",
-    icon: "🔧",
-    estimatedTime: "30-60 min",
-  },
-  {
-    id: 2,
-    name: "Check-up",
-    description: "Routine maintenance and inspection",
-    icon: "🔍",
-    estimatedTime: "45 min",
-  },
-  {
-    id: 3,
-    name: "Repair",
-    description: "Component replacement or repair",
-    icon: "🛠️",
-    estimatedTime: "1-2 hours",
-  },
-  {
-    id: 4,
-    name: "Consultation",
-    description: "Expert advice and guidance",
-    icon: "💬",
-    estimatedTime: "30 min",
-  },
+  { id: "adjustment", icon: Wrench, labelKey: "service.adjustment", color: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" },
+  { id: "checkup", icon: Calendar, labelKey: "service.checkup", color: "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400" },
+  { id: "repair", icon: Wrench, labelKey: "service.repair", color: "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400" },
+  { id: "consultation", icon: MessageCircle, labelKey: "service.consultation", color: "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400" },
 ];
 
-const clinicInfo = {
-  name: "Ortho Innovations Medical Center",
-  address: "123 Medical Plaza, Dubai Healthcare City",
-  phone: "+971 4 123 4567",
-  hours: "Sun-Thu: 8:00 AM - 6:00 PM",
-};
-
-const getStatusBadge = (status: string) => {
-  switch (status) {
-    case "completed":
-      return (
-        <Badge variant="default" className="gap-1">
-          <CheckCircle2 className="w-3 h-3" />
-          Completed
-        </Badge>
-      );
-    case "in_progress":
-      return (
-        <Badge variant="secondary" className="gap-1">
-          <Loader2 className="w-3 h-3 animate-spin" />
-          In Progress
-        </Badge>
-      );
-    case "scheduled":
-      return (
-        <Badge variant="outline" className="gap-1">
-          <Clock className="w-3 h-3" />
-          Scheduled
-        </Badge>
-      );
-    default:
-      return (
-        <Badge variant="outline" className="gap-1">
-          <AlertCircle className="w-3 h-3" />
-          Pending
-        </Badge>
-      );
-  }
-};
+const serviceRequests = [
+  { id: 1, type: "checkup", title: { ru: "Ежегодный осмотр", en: "Annual Check-up" }, date: "Dec 15, 2024", status: "scheduled", time: "10:00 AM" },
+  { id: 2, type: "adjustment", title: { ru: "Настройка выравнивания", en: "Alignment Adjustment" }, date: "Dec 8, 2024", status: "in-progress" },
+  { id: 3, type: "repair", title: { ru: "Замена вкладыша", en: "Liner Replacement" }, date: "Nov 20, 2024", status: "completed" },
+];
 
 export default function Service() {
+  const { t, language } = useLanguage();
+  const [activeTab, setActiveTab] = useState("active");
+
+  const filteredRequests = serviceRequests.filter(req => {
+    if (activeTab === "active") return req.status !== "completed";
+    if (activeTab === "completed") return req.status === "completed";
+    return true;
+  });
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "scheduled": return { class: "bg-primary/10 text-primary", label: t("service.scheduled") };
+      case "in-progress": return { class: "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400", label: t("service.inProgress") };
+      case "completed": return { class: "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400", label: t("rehab.completed") };
+      default: return { class: "bg-muted text-muted-foreground", label: t("service.pending") };
+    }
+  };
+
   return (
-    <DashboardLayout>
-      <div className="space-y-8">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="font-serif text-3xl font-semibold text-foreground">Service Center</h1>
-            <p className="text-muted-foreground mt-1">Maintenance and support for your prosthesis</p>
+    <AppLayout>
+      <div className="px-4 py-6 lg:px-8 lg:py-8 space-y-6 max-w-6xl mx-auto">
+        <div className="flex items-start justify-between">
+          <div className="space-y-1">
+            <h1 className="text-2xl lg:text-3xl font-bold">{t("service.title")}</h1>
+            <p className="text-muted-foreground text-sm lg:text-base">{t("service.subtitle")}</p>
           </div>
-          <Button className="gap-2 w-fit">
-            <Plus className="w-4 h-4" />
-            New Service Request
-          </Button>
+          <button className="flex items-center gap-2 px-4 py-2 bg-accent text-accent-foreground rounded-xl font-medium hover:opacity-90 transition-opacity">
+            <Plus className="w-5 h-5" />
+            <span className="hidden lg:inline">{t("service.newRequest")}</span>
+          </button>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {serviceTypes.map((service) => (
-            <Card 
-              key={service.id} 
-              className="border-none shadow-sm hover:shadow-md transition-all cursor-pointer group"
-            >
-              <CardContent className="pt-6 text-center">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-2xl mx-auto mb-3 group-hover:scale-110 transition-transform">
-                  {service.icon}
+        {/* Quick Service Types */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {serviceTypes.map((type) => (
+            <Card key={type.id} className="border-none shadow-sm card-interactive">
+              <CardContent className="p-4 flex flex-col items-center text-center">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-2 ${type.color}`}>
+                  <type.icon className="w-6 h-6" />
                 </div>
-                <h3 className="font-medium text-sm group-hover:text-primary transition-colors">
-                  {service.name}
-                </h3>
-                <p className="text-xs text-muted-foreground mt-1">{service.description}</p>
-                <p className="text-xs text-primary mt-2">{service.estimatedTime}</p>
+                <span className="text-sm font-medium">{t(type.labelKey)}</span>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        {/* Service Requests */}
-        <Card className="border-none shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-base font-medium flex items-center gap-2">
-              <Wrench className="w-4 h-4 text-primary" />
-              Service Requests
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="active" className="w-full">
-              <TabsList className="mb-4">
-                <TabsTrigger value="active">Active</TabsTrigger>
-                <TabsTrigger value="completed">Completed</TabsTrigger>
-                <TabsTrigger value="all">All</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="active" className="space-y-3">
-                {serviceRequests
-                  .filter(r => r.status !== "completed")
-                  .map((request) => (
-                    <div 
-                      key={request.id}
-                      className="flex items-center gap-4 p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer group"
-                    >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium">{request.type}</span>
-                          {getStatusBadge(request.status)}
-                        </div>
-                        <p className="text-sm text-muted-foreground">{request.description}</p>
-                        <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Calendar className="w-3 h-3" />
-                            {request.scheduledDate}
-                          </span>
-                          <span>{request.technician}</span>
-                        </div>
-                      </div>
-                      <ChevronRight className="w-5 h-5 text-muted-foreground/50 group-hover:text-primary transition-colors" />
-                    </div>
-                  ))}
-              </TabsContent>
-
-              <TabsContent value="completed" className="space-y-3">
-                {serviceRequests
-                  .filter(r => r.status === "completed")
-                  .map((request) => (
-                    <div 
-                      key={request.id}
-                      className="flex items-center gap-4 p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer group"
-                    >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium">{request.type}</span>
-                          {getStatusBadge(request.status)}
-                        </div>
-                        <p className="text-sm text-muted-foreground">{request.description}</p>
-                        <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3" />
-                            Completed {request.completedAt}
-                          </span>
-                          <span>{request.technician}</span>
-                        </div>
-                      </div>
-                      <ChevronRight className="w-5 h-5 text-muted-foreground/50 group-hover:text-primary transition-colors" />
-                    </div>
-                  ))}
-              </TabsContent>
-
-              <TabsContent value="all" className="space-y-3">
-                {serviceRequests.map((request) => (
-                  <div 
-                    key={request.id}
-                    className="flex items-center gap-4 p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer group"
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Service Requests */}
+          <div className="lg:col-span-2 space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="font-bold text-lg">{t("service.requests")}</h2>
+              <div className="flex gap-1 bg-muted rounded-lg p-1">
+                {[
+                  { id: "active", label: t("service.active") },
+                  { id: "completed", label: t("service.completedTab") },
+                  { id: "all", label: t("service.allTab") },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                      activeTab === tab.id ? 'bg-background shadow-sm' : 'text-muted-foreground'
+                    }`}
                   >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-medium">{request.type}</span>
-                        {getStatusBadge(request.status)}
-                      </div>
-                      <p className="text-sm text-muted-foreground">{request.description}</p>
-                      <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          {request.scheduledDate || request.completedAt}
-                        </span>
-                        <span>{request.technician}</span>
-                      </div>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-muted-foreground/50 group-hover:text-primary transition-colors" />
-                  </div>
+                    {tab.label}
+                  </button>
                 ))}
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-
-        {/* Clinic Info */}
-        <Card className="border-none shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-base font-medium flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-primary" />
-              Service Location
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-medium">{clinicInfo.name}</h3>
-                  <p className="text-sm text-muted-foreground mt-1">{clinicInfo.address}</p>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Clock className="w-4 h-4 text-muted-foreground" />
-                  <span>{clinicInfo.hours}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Phone className="w-4 h-4 text-muted-foreground" />
-                  <span>{clinicInfo.phone}</span>
-                </div>
-              </div>
-              <div className="flex flex-col gap-3">
-                <Button variant="outline" className="gap-2 justify-start">
-                  <Phone className="w-4 h-4" />
-                  Call Clinic
-                </Button>
-                <Button variant="outline" className="gap-2 justify-start">
-                  <MessageSquare className="w-4 h-4" />
-                  Send Message
-                </Button>
-                <Button variant="outline" className="gap-2 justify-start">
-                  <MapPin className="w-4 h-4" />
-                  Get Directions
-                </Button>
               </div>
             </div>
-          </CardContent>
-        </Card>
+
+            <div className="space-y-2">
+              {filteredRequests.map((req) => {
+                const statusBadge = getStatusBadge(req.status);
+                const serviceType = serviceTypes.find(t => t.id === req.type);
+                return (
+                  <Card key={req.id} className="border-none shadow-sm card-interactive">
+                    <CardContent className="p-4 flex items-center gap-4">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${serviceType?.color}`}>
+                        {serviceType && <serviceType.icon className="w-6 h-6" />}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${statusBadge.class}`}>
+                            {statusBadge.label}
+                          </span>
+                        </div>
+                        <h3 className="font-medium">{req.title[language]}</h3>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Calendar className="w-3 h-3" />
+                          {req.date}
+                          {req.time && <><Clock className="w-3 h-3 ml-2" />{req.time}</>}
+                        </div>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Service Location */}
+          <div className="space-y-4">
+            <h2 className="font-bold text-lg">{t("service.location")}</h2>
+            <Card className="border-none shadow-sm overflow-hidden">
+              <div className="aspect-video bg-muted relative">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <MapPin className="w-8 h-8 text-primary" />
+                </div>
+              </div>
+              <CardContent className="p-4">
+                <h3 className="font-semibold mb-1">Ortho Innovations L.L.C.</h3>
+                <p className="text-sm text-muted-foreground mb-4">Dubai Healthcare City, Building 47, Dubai, UAE</p>
+                <div className="grid grid-cols-3 gap-2">
+                  <button className="flex flex-col items-center gap-1 p-3 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
+                    <Phone className="w-5 h-5" />
+                    <span className="text-xs">{t("service.callClinic")}</span>
+                  </button>
+                  <button className="flex flex-col items-center gap-1 p-3 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
+                    <MessageCircle className="w-5 h-5" />
+                    <span className="text-xs">{t("service.sendMessage")}</span>
+                  </button>
+                  <button className="flex flex-col items-center gap-1 p-3 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
+                    <Navigation className="w-5 h-5" />
+                    <span className="text-xs">{t("service.getDirections")}</span>
+                  </button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
-    </DashboardLayout>
+    </AppLayout>
   );
 }
