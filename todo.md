@@ -125,3 +125,10 @@
 - [x] Webhook/trigger system for schedule updates (admin routes)
 - [x] Real-time calendar feed updates (ICS feed auto-refresh)
 - [x] Notification to patient when schedule changes
+
+## GitHub & Code Review
+- [ ] Initialize git repository
+- [ ] Commit all changes to GitHub
+- [ ] Run TypeScript strict checks
+- [ ] Review code for optimization
+- [ ] Fix identified issues
