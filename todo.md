@@ -113,3 +113,15 @@
 
 ## Bug Fixes
 - [x] Fix profile button in header (added to mobile header with ProfileSummary popup)
+
+## Color Scheme Update
+- [x] Change from violet/purple to blue-orange tones (matching orthoinnovations.ae)
+- [x] Primary: Blue (HSL 200 100% 50%)
+- [x] Accent: Coral Orange (HSL 16 100% 60%)
+- [x] Update sidebar, buttons, and UI elements
+
+## Automatic Calendar Sync
+- [x] Auto-sync calendar when doctor changes schedule
+- [x] Webhook/trigger system for schedule updates (admin routes)
+- [x] Real-time calendar feed updates (ICS feed auto-refresh)
+- [x] Notification to patient when schedule changes

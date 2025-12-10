@@ -6,6 +6,7 @@ import { z } from "zod";
 import * as db from "./db";
 import { getPatientRehabEvents, generateICSFeed, getCalendarSubscriptionURL } from "./calendar-feed";
 import { processReminders, getNotificationPreferences, updateNotificationPreferences, REMINDER_INTERVALS } from "./notifications";
+import { syncPatientCalendar, onScheduleChange, getLastSyncTime, getCalendarFeedVersion } from "./calendar-sync";
 
 export const appRouter = router({
   system: systemRouter,
@@ -217,6 +218,137 @@ export const appRouter = router({
         dailyProgress: totalToday > 0 ? Math.round((completedToday / totalToday) * 100) : 0,
       };
     }),
+  }),
+
+  // Admin routes for doctors to manage patient schedules
+  admin: router({
+    // Trigger calendar sync when doctor updates schedule
+    syncPatientCalendar: protectedProcedure
+      .input(z.object({
+        patientId: z.number(),
+        changeType: z.enum(['appointment', 'task', 'phase', 'plan']),
+        action: z.enum(['create', 'update', 'delete']),
+        details: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        return onScheduleChange(
+          input.patientId,
+          input.changeType,
+          input.action,
+          input.details
+        );
+      }),
+
+    // Create appointment and auto-sync calendar
+    createAppointment: protectedProcedure
+      .input(z.object({
+        patientId: z.number(),
+        title: z.string(),
+        description: z.string().optional(),
+        scheduledAt: z.string(), // ISO date string
+        duration: z.number().optional(),
+        doctorName: z.string().optional(),
+        location: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const appointment = await db.createAppointment({
+          patientId: input.patientId,
+          title: input.title,
+          description: input.description,
+          scheduledAt: new Date(input.scheduledAt),
+          duration: input.duration || 60,
+          doctorName: input.doctorName,
+          location: input.location,
+        });
+
+        // Auto-sync calendar
+        await onScheduleChange(
+          input.patientId,
+          'appointment',
+          'create',
+          `${input.title} - ${new Date(input.scheduledAt).toLocaleDateString('ru-RU')}`
+        );
+
+        return appointment;
+      }),
+
+    // Update appointment and auto-sync calendar
+    updateAppointment: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        patientId: z.number(),
+        title: z.string().optional(),
+        description: z.string().optional(),
+        scheduledAt: z.string().optional(),
+        duration: z.number().optional(),
+        status: z.enum(['scheduled', 'completed', 'cancelled']).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const appointment = await db.updateAppointment(input.id, {
+          title: input.title,
+          description: input.description,
+          scheduledAt: input.scheduledAt ? new Date(input.scheduledAt) : undefined,
+          duration: input.duration,
+          status: input.status,
+        });
+
+        // Auto-sync calendar
+        await onScheduleChange(
+          input.patientId,
+          'appointment',
+          'update',
+          `Изменения в расписании: ${input.title || 'Приём'}`
+        );
+
+        return appointment;
+      }),
+
+    // Create task and auto-sync calendar
+    createTask: protectedProcedure
+      .input(z.object({
+        patientId: z.number(),
+        phaseId: z.number().optional(),
+        title: z.string(),
+        description: z.string().optional(),
+        type: z.enum(['exercise', 'therapy', 'activity', 'medication']).optional(),
+        duration: z.string().optional(),
+        scheduledDate: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const task = await db.createTask({
+          patientId: input.patientId,
+          phaseId: input.phaseId,
+          title: input.title,
+          description: input.description,
+          type: input.type || 'exercise',
+          duration: input.duration,
+          scheduledDate: input.scheduledDate ? new Date(input.scheduledDate) : undefined,
+        });
+
+        // Auto-sync calendar
+        await onScheduleChange(
+          input.patientId,
+          'task',
+          'create',
+          `Новое упражнение: ${input.title}`
+        );
+
+        return task;
+      }),
+
+    // Get calendar sync status for a patient
+    getCalendarSyncStatus: protectedProcedure
+      .input(z.object({ patientId: z.number() }))
+      .query(async ({ input }) => {
+        const lastSync = getLastSyncTime(input.patientId);
+        const feedVersion = getCalendarFeedVersion(input.patientId);
+        
+        return {
+          lastSyncTime: lastSync?.toISOString() || null,
+          feedVersion,
+          autoSyncEnabled: true,
+        };
+      }),
   }),
 });
 

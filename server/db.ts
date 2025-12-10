@@ -367,3 +367,83 @@ export async function getAchievements(userId: number) {
     .where(eq(achievements.patientId, patient.id))
     .orderBy(desc(achievements.earnedAt));
 }
+
+// Admin functions for creating/updating appointments and tasks
+
+export async function createAppointment(data: {
+  patientId: number;
+  title: string;
+  description?: string;
+  scheduledAt: Date;
+  duration?: number;
+  doctorName?: string;
+  location?: string;
+}) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.insert(appointments).values({
+    patientId: data.patientId,
+    title: data.title,
+    description: data.description,
+    scheduledAt: data.scheduledAt,
+    duration: data.duration || 60,
+    doctorName: data.doctorName,
+    location: data.location,
+    status: "scheduled",
+  });
+  
+  return { id: result[0].insertId, ...data, status: "scheduled" };
+}
+
+export async function updateAppointment(id: number, data: {
+  title?: string;
+  description?: string;
+  scheduledAt?: Date;
+  duration?: number;
+  status?: "scheduled" | "completed" | "cancelled";
+}) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const updateData: Record<string, unknown> = {};
+  if (data.title !== undefined) updateData.title = data.title;
+  if (data.description !== undefined) updateData.description = data.description;
+  if (data.scheduledAt !== undefined) updateData.scheduledAt = data.scheduledAt;
+  if (data.duration !== undefined) updateData.duration = data.duration;
+  if (data.status !== undefined) updateData.status = data.status;
+  
+  if (Object.keys(updateData).length === 0) return null;
+  
+  await db.update(appointments)
+    .set(updateData)
+    .where(eq(appointments.id, id));
+  
+  return { id, ...data };
+}
+
+export async function createTask(data: {
+  patientId: number;
+  phaseId?: number;
+  title: string;
+  description?: string;
+  type?: "exercise" | "therapy" | "activity" | "medication";
+  duration?: string;
+  scheduledDate?: Date;
+}) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.insert(tasks).values({
+    patientId: data.patientId,
+    phaseId: data.phaseId,
+    title: data.title,
+    description: data.description,
+    type: data.type || "exercise",
+    duration: data.duration,
+    scheduledDate: data.scheduledDate,
+    completed: false,
+  });
+  
+  return { id: result[0].insertId, ...data, completed: false };
+}
