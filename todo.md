@@ -235,3 +235,14 @@
 - [x] Deployment testing round 5 (admin orders OK)
 - [x] Fix any errors found (no errors - 32 tests pass)
 - [x] Prepare deployment commands for test server (DEPLOYMENT.md already exists)
+
+
+## Merge to ortho-innovations - Dec 11, 2024
+- [x] Copy patient app to ortho-innovations/frontend/patient-app (already synced)
+- [x] Testing and fixing cycle 1 (TS OK, 32 tests pass, build OK, no console errors)
+- [x] Testing and fixing cycle 2 (service page OK, modal works, admin OK)
+- [x] Testing and fixing cycle 3 (admin orders OK, rehabilitation OK)
+- [x] Testing and fixing cycle 4 (knowledge base OK, prosthesis OK, no console errors)
+- [x] Testing and fixing cycle 5 (build OK, 32 tests pass, calendar OK, no errors)
+- [x] Update ortho-innovations repository on GitHub (pushed commit 0ad77d7)
+- [x] Delete ortho-patient-app repository (deleted sileade/ortho-patient-app)
