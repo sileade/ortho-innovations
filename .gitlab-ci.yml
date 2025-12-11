@@ -129,34 +129,44 @@ deploy-production:
     - |
       ssh $DEPLOY_USER@$DEPLOY_SERVER << 'ENDSSH'
         set -e
-        echo "=== Starting deployment ==="
+        echo "=== Starting deployment via GitLab CI/CD ==="
         
-        # Переход в директорию проекта
-        cd /opt/ortho-innovations
-        
-        # Получение последних изменений
-        echo "=== Pulling latest changes ==="
-        git fetch origin main
-        git reset --hard origin/main
-        
-        # Переход в директорию приложения
-        cd frontend/patient-app
-        
-        # Остановка текущих контейнеров
-        echo "=== Stopping current containers ==="
-        docker compose -f docker-compose.dev.yml down || true
-        
-        # Очистка старых образов (опционально)
-        echo "=== Cleaning old images ==="
-        docker image prune -f || true
-        
-        # Сборка и запуск новых контейнеров
-        echo "=== Building and starting new containers ==="
-        docker compose -f docker-compose.dev.yml up -d --build
+        # Метод 1: Использование скрипта деплоя (рекомендуется)
+        if [ -f "/opt/ortho-innovations/frontend/patient-app/scripts/deploy.sh" ]; then
+            echo "Using deploy.sh script..."
+            cd /opt/ortho-innovations/frontend/patient-app
+            bash scripts/deploy.sh --backup
+        else
+            # Метод 2: Прямой деплой (фолбэк)
+            echo "Deploy script not found, using direct method..."
+            
+            # Переход в директорию проекта
+            cd /opt/ortho-innovations
+            
+            # Получение последних изменений
+            echo "=== Pulling latest changes ==="
+            git fetch origin main
+            git reset --hard origin/main
+            
+            # Переход в директорию приложения
+            cd frontend/patient-app
+            
+            # Остановка текущих контейнеров
+            echo "=== Stopping current containers ==="
+            docker compose -f docker-compose.dev.yml down || true
+            
+            # Очистка старых образов
+            echo "=== Cleaning old images ==="
+            docker image prune -f || true
+            
+            # Сборка и запуск новых контейнеров
+            echo "=== Building and starting new containers ==="
+            docker compose -f docker-compose.dev.yml up -d --build
+        fi
         
         # Проверка статуса
         echo "=== Checking container status ==="
-        sleep 10
+        sleep 15
         docker compose -f docker-compose.dev.yml ps
         
         # Проверка health check

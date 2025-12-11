@@ -4,10 +4,20 @@
 # =============================================================================
 # Скрипт для автоматического развёртывания приложения на сервере
 # Использование: ./deploy.sh [options]
+# 
 # Опции:
-#   --build     Пересобрать Docker образы
-#   --no-pull   Не делать git pull
-#   --rollback  Откатить к предыдущей версии
+#   --no-build   Не пересобирать Docker образы
+#   --no-pull    Не делать git pull
+#   --rollback   Откатить к предыдущей версии
+#   --backup     Создать бэкап БД перед деплоем
+#   --logs       Показать логи после деплоя
+#
+# Текущая структура сервера:
+#   cd /opt/ortho-innovations
+#   git pull origin main
+#   cd frontend/patient-app
+#   docker compose -f docker-compose.dev.yml down
+#   docker compose -f docker-compose.dev.yml up -d --build
 # =============================================================================
 
 set -e
@@ -17,18 +27,22 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+CYAN='\033[0;36m'
+NC='\033[0m'
 
-# Конфигурация
+# Конфигурация - соответствует текущей структуре сервера
 PROJECT_ROOT="/opt/ortho-innovations"
 APP_DIR="frontend/patient-app"
 COMPOSE_FILE="docker-compose.dev.yml"
 LOG_FILE="/var/log/ortho-deploy.log"
+BACKUP_DIR="/opt/ortho-backups"
 
 # Параметры по умолчанию
 DO_BUILD=true
 DO_PULL=true
 DO_ROLLBACK=false
+DO_BACKUP=false
+SHOW_LOGS=false
 
 # Функции логирования
 log_info() {
@@ -66,8 +80,26 @@ while [[ $# -gt 0 ]]; do
             DO_ROLLBACK=true
             shift
             ;;
+        --backup)
+            DO_BACKUP=true
+            shift
+            ;;
+        --logs)
+            SHOW_LOGS=true
+            shift
+            ;;
+        --help)
+            echo "Usage: ./deploy.sh [options]"
+            echo "Options:"
+            echo "  --no-build   Skip Docker image rebuild"
+            echo "  --no-pull    Skip git pull"
+            echo "  --rollback   Rollback to previous version"
+            echo "  --backup     Create database backup before deploy"
+            echo "  --logs       Show logs after deployment"
+            exit 0
+            ;;
         *)
-            log_error "Unknown option: $1"
+            log_error "Unknown option: $1. Use --help for usage."
             exit 1
             ;;
     esac
@@ -115,6 +147,25 @@ cd "$APP_DIR" || {
 # Сохранение текущего коммита для возможного отката
 CURRENT_COMMIT=$(git rev-parse HEAD)
 log_info "Current commit: $CURRENT_COMMIT"
+
+# Бэкап базы данных перед деплоем
+if [ "$DO_BACKUP" = true ]; then
+    log_info "Creating database backup..."
+    mkdir -p "$BACKUP_DIR"
+    BACKUP_FILE="$BACKUP_DIR/ortho_backup_$(date '+%Y%m%d_%H%M%S').sql"
+    
+    # Проверяем, запущен ли контейнер БД
+    if docker compose -f "$COMPOSE_FILE" ps db --status running 2>/dev/null | grep -q "running"; then
+        docker compose -f "$COMPOSE_FILE" exec -T db pg_dump -U ortho ortho_patient > "$BACKUP_FILE" 2>/dev/null && \
+            log_success "Database backup created: $BACKUP_FILE" || \
+            log_warning "Database backup failed, continuing deployment..."
+    else
+        log_warning "Database container not running, skipping backup"
+    fi
+    
+    # Удаление старых бэкапов (старше 7 дней)
+    find "$BACKUP_DIR" -name "ortho_backup_*.sql" -mtime +7 -delete 2>/dev/null || true
+fi
 
 # Остановка контейнеров
 log_info "Stopping current containers..."
@@ -172,6 +223,21 @@ log_info "=========================================="
 log_success "Deployment completed at $(date)"
 log_info "=========================================="
 
-# Вывод последних логов
-log_info "Recent application logs:"
-docker compose -f "$COMPOSE_FILE" logs --tail=20
+# Вывод последних логов (опционально)
+if [ "$SHOW_LOGS" = true ]; then
+    log_info "Recent application logs:"
+    docker compose -f "$COMPOSE_FILE" logs --tail=50
+fi
+
+# Вывод информации о деплое
+echo ""
+echo -e "${CYAN}═══ DEPLOYMENT SUMMARY ═══${NC}"
+echo -e "Commit: ${GREEN}$CURRENT_COMMIT${NC}"
+echo -e "Time: ${GREEN}$(date)${NC}"
+echo -e "Status: ${GREEN}SUCCESS${NC}"
+echo ""
+echo -e "${YELLOW}Useful commands:${NC}"
+echo "  View logs:     docker compose -f $COMPOSE_FILE logs -f"
+echo "  Restart:       docker compose -f $COMPOSE_FILE restart"
+echo "  Stop:          docker compose -f $COMPOSE_FILE down"
+echo "  Status:        docker compose -f $COMPOSE_FILE ps"
