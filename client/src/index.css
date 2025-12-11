@@ -20,8 +20,8 @@
 }
 
 :root {
-  /* Ortho Innovations Color Scheme - Blue & Orange (matching orthoinnovations.ae) */
-  /* Primary: Bright Blue (#0099FF), Accent: Coral Orange (#FF6B35) */
+  /* Ortho Innovations Color Scheme - Purple & Mint (per requirements) */
+  /* Primary: Calm Purple (#7C3AED), Accent: Mint Green (#10B981) */
   --background: 0 0% 100%;
   --foreground: 222 47% 11%;
   
@@ -31,19 +31,19 @@
   --popover: 0 0% 100%;
   --popover-foreground: 222 47% 11%;
   
-  /* Primary Blue - matching orthoinnovations.ae hero section */
-  --primary: 200 100% 50%;
+  /* Primary Purple - calm tones for buttons, links, branding */
+  --primary: 263 70% 58%;
   --primary-foreground: 0 0% 100%;
   
-  /* Secondary - Light blue */
-  --secondary: 200 80% 95%;
-  --secondary-foreground: 200 100% 35%;
+  /* Secondary - Light purple */
+  --secondary: 263 50% 95%;
+  --secondary-foreground: 263 70% 45%;
   
   --muted: 220 14% 96%;
   --muted-foreground: 220 9% 46%;
   
-  /* Accent - Coral Orange (from SHOP NOW button) */
-  --accent: 16 100% 60%;
+  /* Accent - Mint Green for notifications and cards */
+  --accent: 160 84% 39%;
   --accent-foreground: 0 0% 100%;
   
   --destructive: 0 84% 60%;
@@ -51,26 +51,26 @@
   
   --border: 220 13% 91%;
   --input: 220 13% 91%;
-  --ring: 200 100% 50%;
+  --ring: 263 70% 58%;
   
   /* Success green for notifications */
-  --success: 142 76% 36%;
+  --success: 160 84% 39%;
   --success-foreground: 0 0% 100%;
   
   /* Warning orange */
-  --warning: 16 100% 60%;
+  --warning: 38 92% 50%;
   --warning-foreground: 0 0% 100%;
   
   --radius: 0.75rem;
   
-  /* Sidebar - Blue theme matching orthoinnovations.ae */
-  --sidebar-background: 200 100% 50%;
+  /* Sidebar - Purple theme */
+  --sidebar-background: 263 70% 58%;
   --sidebar-foreground: 0 0% 100%;
   --sidebar-primary: 0 0% 100%;
-  --sidebar-primary-foreground: 200 100% 50%;
-  --sidebar-accent: 200 100% 60%;
+  --sidebar-primary-foreground: 263 70% 58%;
+  --sidebar-accent: 263 70% 65%;
   --sidebar-accent-foreground: 0 0% 100%;
-  --sidebar-border: 200 100% 40%;
+  --sidebar-border: 263 70% 50%;
   --sidebar-ring: 0 0% 100%;
 }
 
@@ -84,18 +84,18 @@
   --popover: 222 47% 15%;
   --popover-foreground: 210 40% 98%;
   
-  /* Primary Blue - darker variant for dark mode */
-  --primary: 200 100% 55%;
+  /* Primary Purple - darker variant for dark mode */
+  --primary: 263 70% 65%;
   --primary-foreground: 0 0% 100%;
   
-  --secondary: 200 33% 20%;
+  --secondary: 263 33% 20%;
   --secondary-foreground: 210 40% 98%;
   
   --muted: 220 33% 17%;
   --muted-foreground: 220 20% 65%;
   
-  /* Accent - Coral Orange */
-  --accent: 16 100% 55%;
+  /* Accent - Mint Green */
+  --accent: 160 84% 45%;
   --accent-foreground: 0 0% 100%;
   
   --destructive: 0 62% 30%;
@@ -103,17 +103,17 @@
   
   --border: 220 33% 25%;
   --input: 220 33% 25%;
-  --ring: 200 100% 55%;
+  --ring: 263 70% 65%;
   
-  /* Sidebar - Dark mode with blue accent */
+  /* Sidebar - Dark mode with purple accent */
   --sidebar-background: 222 47% 11%;
   --sidebar-foreground: 210 40% 98%;
-  --sidebar-primary: 200 100% 55%;
+  --sidebar-primary: 263 70% 65%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 200 33% 20%;
+  --sidebar-accent: 263 33% 20%;
   --sidebar-accent-foreground: 210 40% 98%;
   --sidebar-border: 220 33% 25%;
-  --sidebar-ring: 200 100% 55%;
+  --sidebar-ring: 263 70% 65%;
 }
 
 @theme inline {
@@ -252,8 +252,23 @@
   stroke-linejoin: round;
 }
 
-/* Orange accent button style (like SHOP NOW on orthoinnovations.ae) */
-.btn-accent-orange {
+/* Purple accent button style (primary action) */
+.btn-accent-purple {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border-radius: 9999px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn-accent-purple:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* Mint accent for notifications and success states */
+.btn-accent-mint {
   background: hsl(var(--accent));
   color: hsl(var(--accent-foreground));
   border-radius: 9999px;
@@ -262,7 +277,7 @@
   transition: all 0.2s;
 }
 
-.btn-accent-orange:hover {
+.btn-accent-mint:hover {
   opacity: 0.9;
   transform: translateY(-1px);
 }
