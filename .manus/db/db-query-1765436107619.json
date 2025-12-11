@@ -1,0 +1,46 @@
+{
+  "query": "SHOW TABLES;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user m5gBgwdCwANyXUV.7565e41de507 --database YfUiApmmg5pEpSHb6hMb9y --execute SHOW TABLES;",
+  "rows": [
+    {
+      "Tables_in_YfUiApmmg5pEpSHb6hMb9y": "__drizzle_migrations"
+    },
+    {
+      "Tables_in_YfUiApmmg5pEpSHb6hMb9y": "achievements"
+    },
+    {
+      "Tables_in_YfUiApmmg5pEpSHb6hMb9y": "appointments"
+    },
+    {
+      "Tables_in_YfUiApmmg5pEpSHb6hMb9y": "articles"
+    },
+    {
+      "Tables_in_YfUiApmmg5pEpSHb6hMb9y": "notifications"
+    },
+    {
+      "Tables_in_YfUiApmmg5pEpSHb6hMb9y": "patients"
+    },
+    {
+      "Tables_in_YfUiApmmg5pEpSHb6hMb9y": "prostheses"
+    },
+    {
+      "Tables_in_YfUiApmmg5pEpSHb6hMb9y": "rehabilitationPhases"
+    },
+    {
+      "Tables_in_YfUiApmmg5pEpSHb6hMb9y": "rehabilitationPlans"
+    },
+    {
+      "Tables_in_YfUiApmmg5pEpSHb6hMb9y": "serviceRequests"
+    },
+    {
+      "Tables_in_YfUiApmmg5pEpSHb6hMb9y": "tasks"
+    },
+    {
+      "Tables_in_YfUiApmmg5pEpSHb6hMb9y": "users"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_YfUiApmmg5pEpSHb6hMb9y\n__drizzle_migrations\nachievements\nappointments\narticles\nnotifications\npatients\nprostheses\nrehabilitationPhases\nrehabilitationPlans\nserviceRequests\ntasks\nusers\n",
+  "stderr": "",
+  "execution_time_ms": 52
+}

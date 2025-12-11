@@ -1,0 +1,17 @@
+{
+  "query": "SELECT \n  (SELECT COUNT(*) FROM users) as users_count,\n  (SELECT COUNT(*) FROM patients) as patients_count,\n  (SELECT COUNT(*) FROM serviceRequests) as service_requests_count,\n  (SELECT COUNT(*) FROM rehabilitationPlans) as rehab_plans_count,\n  (SELECT COUNT(*) FROM articles) as articles_count;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user m5gBgwdCwANyXUV.7565e41de507 --database YfUiApmmg5pEpSHb6hMb9y --execute SELECT \n  (SELECT COUNT(*) FROM users) as users_count,\n  (SELECT COUNT(*) FROM patients) as patients_count,\n  (SELECT COUNT(*) FROM serviceRequests) as service_requests_count,\n  (SELECT COUNT(*) FROM rehabilitationPlans) as rehab_plans_count,\n  (SELECT COUNT(*) FROM articles) as articles_count;",
+  "rows": [
+    {
+      "users_count": "1",
+      "patients_count": "1",
+      "service_requests_count": "9",
+      "rehab_plans_count": "0",
+      "articles_count": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "users_count\tpatients_count\tservice_requests_count\trehab_plans_count\tarticles_count\n1\t1\t9\t0\t0\n",
+  "stderr": "",
+  "execution_time_ms": 59
+}
