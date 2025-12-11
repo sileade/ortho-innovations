@@ -382,3 +382,8 @@
 - [ ] Comprehensive UI testing - admin app
 - [ ] Test interactions between apps
 - [ ] Commit to GitHub
+
+## Card Visibility Fix - Dec 11, 2024 (Session 14)
+- [x] Add turquoise/teal borders to cards in light theme (HSL 174 72% 56%)
+- [x] Test changes (patient app and admin panel both show borders)
+- [x] Commit to GitHub (d4971fa)
