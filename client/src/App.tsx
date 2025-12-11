@@ -6,6 +6,8 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { lazy, Suspense } from "react";
+import { LoadingBar } from "./components/LoadingBar";
+import { OfflineIndicator } from "./components/OfflineIndicator";
 
 // Loading component for lazy loaded pages
 const PageLoader = () => (
@@ -76,6 +78,8 @@ function App() {
       <ThemeProvider defaultTheme="light">
         <LanguageProvider>
           <TooltipProvider>
+            <LoadingBar />
+            <OfflineIndicator />
             <Toaster />
             <Router />
           </TooltipProvider>
