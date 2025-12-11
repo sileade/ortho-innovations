@@ -95,6 +95,19 @@ export default function Service() {
       console.error('Service request creation error:', error);
     }
   });
+  
+  // Cancel service request mutation
+  const cancelRequestMutation = trpc.service.cancelRequest.useMutation({
+    onSuccess: () => {
+      refetchRequests();
+      setSelectedRequest(null);
+      toast.success(language === 'ru' ? 'Заявка отменена' : 'Request cancelled');
+    },
+    onError: (error) => {
+      console.error('Service request cancellation error:', error);
+      toast.error(language === 'ru' ? 'Ошибка при отмене заявки' : 'Failed to cancel request');
+    }
+  });
 
   const filteredRequests = (serviceRequests || []).filter((req: any) => {
     if (activeTab === "active") return req.status !== "completed";
@@ -763,11 +776,16 @@ END:VCALENDAR`;
 
           <DialogFooter className="flex gap-2">
             {selectedRequest?.status === 'pending' && (
-              <Button variant="destructive" onClick={() => {
-                // TODO: Implement cancel request
-                setSelectedRequest(null);
-              }}>
-                {language === 'ru' ? 'Отменить заявку' : 'Cancel Request'}
+              <Button 
+                variant="destructive" 
+                disabled={cancelRequestMutation.isPending}
+                onClick={() => {
+                  cancelRequestMutation.mutate({ id: selectedRequest.id });
+                }}
+              >
+                {cancelRequestMutation.isPending 
+                  ? (language === 'ru' ? 'Отмена...' : 'Cancelling...') 
+                  : (language === 'ru' ? 'Отменить заявку' : 'Cancel Request')}
               </Button>
             )}
             <Button variant="outline" onClick={() => setSelectedRequest(null)}>

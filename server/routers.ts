@@ -125,6 +125,14 @@ export const appRouter = router({
       .mutation(async ({ ctx, input }) => {
         return db.createServiceRequest(ctx.user.id, input);
       }),
+    
+    cancelRequest: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return db.cancelServiceRequest(ctx.user.id, input.id);
+      }),
   }),
 
   // Appointments procedures

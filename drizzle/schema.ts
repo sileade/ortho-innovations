@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, boolean, json } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, boolean, json, index } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -38,7 +38,10 @@ export const patients = mysqlTable("patients", {
   status: mysqlEnum("status", ["active", "inactive"]).default("active"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => [
+  index("idx_patients_userId").on(table.userId),
+  index("idx_patients_status").on(table.status),
+]);
 
 export type Patient = typeof patients.$inferSelect;
 export type InsertPatient = typeof patients.$inferInsert;
@@ -60,7 +63,9 @@ export const prostheses = mysqlTable("prostheses", {
   qrCode: text("qrCode"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => [
+  index("idx_prostheses_patientId").on(table.patientId),
+]);
 
 export type Prosthesis = typeof prostheses.$inferSelect;
 export type InsertProsthesis = typeof prostheses.$inferInsert;
@@ -85,7 +90,10 @@ export const rehabilitationPlans = mysqlTable("rehabilitationPlans", {
   progress: int("progress").default(0),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => [
+  index("idx_rehabPlans_patientId").on(table.patientId),
+  index("idx_rehabPlans_status").on(table.status),
+]);
 
 export type RehabilitationPlan = typeof rehabilitationPlans.$inferSelect;
 export type InsertRehabilitationPlan = typeof rehabilitationPlans.$inferInsert;
@@ -106,7 +114,9 @@ export const rehabilitationPhases = mysqlTable("rehabilitationPhases", {
   completedTasks: int("completedTasks").default(0),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => [
+  index("idx_rehabPhases_planId").on(table.planId),
+]);
 
 export type RehabilitationPhase = typeof rehabilitationPhases.$inferSelect;
 export type InsertRehabilitationPhase = typeof rehabilitationPhases.$inferInsert;
@@ -128,7 +138,11 @@ export const tasks = mysqlTable("tasks", {
   completedAt: timestamp("completedAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => [
+  index("idx_tasks_patientId").on(table.patientId),
+  index("idx_tasks_scheduledDate").on(table.scheduledDate),
+  index("idx_tasks_phaseId").on(table.phaseId),
+]);
 
 export type Task = typeof tasks.$inferSelect;
 export type InsertTask = typeof tasks.$inferInsert;
@@ -152,7 +166,10 @@ export const articles = mysqlTable("articles", {
   published: boolean("published").default(true),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => [
+  index("idx_articles_category").on(table.category),
+  index("idx_articles_type").on(table.type),
+]);
 
 export type Article = typeof articles.$inferSelect;
 export type InsertArticle = typeof articles.$inferInsert;
@@ -172,7 +189,10 @@ export const serviceRequests = mysqlTable("serviceRequests", {
   notes: text("notes"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => [
+  index("idx_serviceRequests_patientId").on(table.patientId),
+  index("idx_serviceRequests_status").on(table.status),
+]);
 
 export type ServiceRequest = typeof serviceRequests.$inferSelect;
 export type InsertServiceRequest = typeof serviceRequests.$inferInsert;
@@ -193,7 +213,11 @@ export const appointments = mysqlTable("appointments", {
   reminderSent: boolean("reminderSent").default(false),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => [
+  index("idx_appointments_patientId").on(table.patientId),
+  index("idx_appointments_scheduledAt").on(table.scheduledAt),
+  index("idx_appointments_status").on(table.status),
+]);
 
 export type Appointment = typeof appointments.$inferSelect;
 export type InsertAppointment = typeof appointments.$inferInsert;
@@ -210,7 +234,10 @@ export const notifications = mysqlTable("notifications", {
   read: boolean("read").default(false),
   readAt: timestamp("readAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
+}, (table) => [
+  index("idx_notifications_userId").on(table.userId),
+  index("idx_notifications_read").on(table.read),
+]);
 
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = typeof notifications.$inferInsert;
@@ -225,7 +252,9 @@ export const achievements = mysqlTable("achievements", {
   description: text("description"),
   icon: varchar("icon", { length: 32 }),
   earnedAt: timestamp("earnedAt").defaultNow().notNull(),
-});
+}, (table) => [
+  index("idx_achievements_patientId").on(table.patientId),
+]);
 
 export type Achievement = typeof achievements.$inferSelect;
 export type InsertAchievement = typeof achievements.$inferInsert;

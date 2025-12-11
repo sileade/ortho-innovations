@@ -1,4 +1,4 @@
-import { eq, and, desc, sql, like, or } from "drizzle-orm";
+import { eq, and, desc, sql, like, or, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { 
   InsertUser, 
@@ -318,6 +318,36 @@ export async function createServiceRequest(userId: number, data: {
   });
   
   return { id: result[0].insertId, ...data, status: "pending" };
+}
+
+export async function cancelServiceRequest(userId: number, requestId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const patient = await getPatientByUserId(userId);
+  if (!patient) return null;
+  
+  // Verify the request belongs to this patient
+  const existingRequest = await db.select()
+    .from(serviceRequests)
+    .where(and(
+      eq(serviceRequests.id, requestId),
+      eq(serviceRequests.patientId, patient.id)
+    ))
+    .limit(1);
+  
+  if (!existingRequest.length) return null;
+  
+  // Only allow cancelling pending requests
+  if (existingRequest[0].status !== 'pending') {
+    return { error: 'Cannot cancel non-pending request' };
+  }
+  
+  await db.update(serviceRequests)
+    .set({ status: 'cancelled' })
+    .where(eq(serviceRequests.id, requestId));
+  
+  return { id: requestId, status: 'cancelled' };
 }
 
 // Appointment queries
@@ -798,7 +828,7 @@ export async function createBroadcastNotification(data: {
   } else if (data.patientIds && data.patientIds.length > 0) {
     const patientsList = await db.select({ userId: patients.userId })
       .from(patients)
-      .where(sql`${patients.id} IN (${data.patientIds.join(',')})`);
+      .where(inArray(patients.id, data.patientIds));
     targetUserIds = patientsList.map(p => p.userId!).filter(Boolean);
   }
   
