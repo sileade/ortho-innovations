@@ -126,8 +126,16 @@ export default function Service() {
     
     setIsSubmitting(true);
     try {
+      // Map frontend service type to API type (emergency -> consultation)
+      const typeMap: Record<string, 'checkup' | 'adjustment' | 'repair' | 'consultation'> = {
+        'adjustment': 'adjustment',
+        'checkup': 'checkup',
+        'repair': 'repair',
+        'emergency': 'consultation', // Emergency maps to consultation type
+      };
+      
       await createRequestMutation.mutateAsync({
-        type: selectedService.id as 'checkup' | 'adjustment' | 'repair' | 'consultation',
+        type: typeMap[selectedService.id] || 'checkup',
         description: `${t(selectedService.descKey)}. ${language === 'ru' ? 'Специалист' : 'Specialist'}: ${selectedSpecialist?.name || 'Any'}`,
       });
       

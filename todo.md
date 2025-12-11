@@ -197,3 +197,5 @@
 - [x] Fix service requests not appearing in admin panel (orders)
 - [x] Fix patient auto-creation on first login (ensurePatientExists)
 - [x] Fix getAllOrders to return data in expected format with patient info
+
+- [x] Fix service type validation error (emergency -> consultation mapping)
