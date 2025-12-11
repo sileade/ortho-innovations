@@ -3,7 +3,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useState } from "react";
-import { Search, Play, BookOpen, Clock, ChevronRight, Star } from "lucide-react";
+import { Search, Play, BookOpen, Clock, ChevronRight, Star, ArrowLeft } from "lucide-react";
+import { trpc } from "@/lib/trpc";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const categories = [
   { id: "all", labelKey: "knowledge.all" },
@@ -13,26 +15,98 @@ const categories = [
   { id: "faq", labelKey: "knowledge.faq" },
 ];
 
-const articles = [
-  { id: 1, title: { ru: "Упражнения для укрепления квадрицепса", en: "Quadriceps Strengthening Exercises" }, description: { ru: "Пошаговое руководство по упражнениям", en: "Step-by-step guide to essential exercises" }, category: "exercises", type: "video", duration: "12", featured: true, image: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400" },
-  { id: 2, title: { ru: "Питание для восстановления", en: "Nutrition for Recovery" }, description: { ru: "Продукты, способствующие заживлению", en: "Foods that promote healing and recovery" }, category: "nutrition", type: "article", duration: "8", featured: true, image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400" },
-  { id: 3, title: { ru: "Понимание фантомных ощущений", en: "Understanding Phantom Sensations" }, description: { ru: "Что это такое и как с ними справляться", en: "What they are and how to manage them" }, category: "recovery", type: "article", duration: "10", featured: false, image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400" },
-  { id: 4, title: { ru: "Тренировка баланса", en: "Balance Training Basics" }, description: { ru: "Основы для начинающих", en: "Foundation exercises for beginners" }, category: "exercises", type: "video", duration: "15", featured: false, image: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=400" },
-  { id: 5, title: { ru: "Уход за протезом", en: "Prosthesis Care Guide" }, description: { ru: "Ежедневное обслуживание и уход", en: "Daily maintenance and care tips" }, category: "recovery", type: "article", duration: "6", featured: false, image: "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=400" },
-];
-
 export default function Knowledge() {
   const { t, language } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
+  const [selectedArticleId, setSelectedArticleId] = useState<number | null>(null);
 
-  const filteredArticles = articles.filter(article => {
-    const matchesCategory = activeCategory === "all" || article.category === activeCategory;
-    const matchesSearch = searchQuery === "" || article.title[language].toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+  // Fetch articles from API
+  const { data: articles, isLoading } = trpc.knowledge.getArticles.useQuery({
+    category: activeCategory === "all" ? undefined : activeCategory,
+    search: searchQuery || undefined,
   });
 
-  const featuredArticles = articles.filter(a => a.featured);
+  // Fetch single article when selected
+  const { data: articleDetail, isLoading: articleLoading } = trpc.knowledge.getArticle.useQuery(
+    { id: selectedArticleId! },
+    { enabled: !!selectedArticleId }
+  );
+
+  // Increment views mutation
+  const incrementViewsMutation = trpc.knowledge.incrementViews.useMutation();
+
+  const handleArticleClick = (articleId: number) => {
+    setSelectedArticleId(articleId);
+    incrementViewsMutation.mutate({ id: articleId });
+  };
+
+  const filteredArticles = articles || [];
+  const featuredArticles = filteredArticles.filter(a => a.featured);
+
+  // Article detail view
+  if (selectedArticleId && articleDetail) {
+    return (
+      <AppLayout>
+        <div className="px-4 py-6 lg:px-8 lg:py-8 max-w-4xl mx-auto">
+          <button 
+            onClick={() => setSelectedArticleId(null)}
+            className="flex items-center gap-2 text-primary mb-6 hover:underline"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            {language === 'ru' ? 'Назад к статьям' : 'Back to articles'}
+          </button>
+          
+          {articleLoading ? (
+            <div className="space-y-4">
+              <Skeleton className="h-8 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+              <Skeleton className="h-64 w-full" />
+            </div>
+          ) : (
+            <article className="prose dark:prose-invert max-w-none">
+              <h1 className="text-2xl lg:text-3xl font-bold mb-2">
+                {language === 'ru' ? articleDetail.title : (articleDetail.titleEn || articleDetail.title)}
+              </h1>
+              <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6">
+                <span className="px-2 py-1 bg-muted rounded capitalize">{articleDetail.category}</span>
+                <span>{articleDetail.views || 0} {language === 'ru' ? 'просмотров' : 'views'}</span>
+                {(articleDetail as any).readTime && (
+                  <span>{(articleDetail as any).readTime} {language === 'ru' ? 'мин чтения' : 'min read'}</span>
+                )}
+              </div>
+              {(articleDetail as any).imageUrl && (
+                <img 
+                  src={(articleDetail as any).imageUrl} 
+                  alt={articleDetail.title}
+                  className="w-full h-64 object-cover rounded-xl mb-6"
+                />
+              )}
+              <div className="text-foreground whitespace-pre-wrap">
+                {articleDetail.content || articleDetail.description || ''}
+              </div>
+              {articleDetail.videoUrl && (
+                <div className="mt-6">
+                  <h3 className="font-bold mb-3">{language === 'ru' ? 'Видео' : 'Video'}</h3>
+                  <div className="aspect-video bg-muted rounded-xl flex items-center justify-center">
+                    <a 
+                      href={articleDetail.videoUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-primary hover:underline"
+                    >
+                      <Play className="w-6 h-6" />
+                      {language === 'ru' ? 'Смотреть видео' : 'Watch video'}
+                    </a>
+                  </div>
+                </div>
+              )}
+            </article>
+          )}
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>
@@ -55,7 +129,7 @@ export default function Knowledge() {
           ))}
         </div>
 
-        {activeCategory === "all" && searchQuery === "" && (
+        {activeCategory === "all" && searchQuery === "" && featuredArticles.length > 0 && (
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Star className="w-5 h-5 text-yellow-500" />
@@ -63,9 +137,19 @@ export default function Knowledge() {
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {featuredArticles.map((article) => (
-                <Card key={article.id} className="border-none shadow-sm card-interactive overflow-hidden">
+                <Card 
+                  key={article.id} 
+                  className="border-none shadow-sm card-interactive overflow-hidden cursor-pointer"
+                  onClick={() => handleArticleClick(article.id)}
+                >
                   <div className="aspect-video relative">
-                    <img src={article.image} alt={article.title[language]} className="w-full h-full object-cover" />
+                    {(article as any).imageUrl ? (
+                      <img src={(article as any).imageUrl} alt={language === 'ru' ? article.title : (article.titleEn || article.title)} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                        <BookOpen className="w-12 h-12 text-muted-foreground/50" />
+                      </div>
+                    )}
                     {article.type === "video" && (
                       <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                         <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center">
@@ -75,11 +159,11 @@ export default function Knowledge() {
                     )}
                   </div>
                   <CardContent className="p-4">
-                    <h3 className="font-semibold mb-1">{article.title[language]}</h3>
-                    <p className="text-sm text-muted-foreground mb-2">{article.description[language]}</p>
+                    <h3 className="font-semibold mb-1">{language === 'ru' ? article.title : (article.titleEn || article.title)}</h3>
+                    <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{article.description}</p>
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Clock className="w-3 h-3" />
-                      {article.duration} {t("knowledge.min")}
+                      {(article as any).readTime || '5'} {t("knowledge.min")}
                     </div>
                   </CardContent>
                 </Card>
@@ -91,26 +175,59 @@ export default function Knowledge() {
         <div className="space-y-3">
           <h2 className="font-bold text-lg">{t("knowledge.allResources")}</h2>
           <div className="space-y-2">
-            {filteredArticles.length > 0 ? filteredArticles.map((article) => (
-              <Card key={article.id} className="border-none shadow-sm card-interactive">
-                <CardContent className="p-3 lg:p-4 flex items-center gap-3">
-                  <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-xl overflow-hidden flex-shrink-0">
-                    <img src={article.image} alt={article.title[language]} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <span className={`px-2 py-0.5 rounded text-xs font-medium ${article.type === "video" ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'bg-primary/10 text-primary'}`}>
-                      {article.type === "video" ? t("knowledge.video") : t("knowledge.article")}
-                    </span>
-                    <h3 className="font-medium text-sm lg:text-base line-clamp-1 mt-1">{article.title[language]}</h3>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                      <Clock className="w-3 h-3" />
-                      {article.duration} {t("knowledge.min")}
+            {isLoading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <Card key={i} className="border-none shadow-sm">
+                  <CardContent className="p-3 lg:p-4 flex items-center gap-3">
+                    <Skeleton className="w-16 h-16 lg:w-20 lg:h-20 rounded-xl" />
+                    <div className="flex-1">
+                      <Skeleton className="h-4 w-20 mb-2" />
+                      <Skeleton className="h-5 w-48 mb-1" />
+                      <Skeleton className="h-3 w-16" />
                     </div>
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                </CardContent>
-              </Card>
-            )) : (
+                  </CardContent>
+                </Card>
+              ))
+            ) : filteredArticles.length > 0 ? (
+              filteredArticles.map((article: any) => (
+                <Card 
+                  key={article.id} 
+                  className="border-none shadow-sm card-interactive cursor-pointer"
+                  onClick={() => handleArticleClick(article.id)}
+                >
+                  <CardContent className="p-3 lg:p-4 flex items-center gap-3">
+                    <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-xl overflow-hidden flex-shrink-0">
+                      {(article as any).imageUrl ? (
+                        <img src={(article as any).imageUrl} alt={language === 'ru' ? article.title : (article.titleEn || article.title)} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
+                          {article.type === "video" ? (
+                            <Play className="w-6 h-6 text-muted-foreground/50" />
+                          ) : (
+                            <BookOpen className="w-6 h-6 text-muted-foreground/50" />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${article.type === "video" ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'bg-primary/10 text-primary'}`}>
+                        {article.type === "video" ? t("knowledge.video") : t("knowledge.article")}
+                      </span>
+                      <h3 className="font-medium text-sm lg:text-base line-clamp-1 mt-1">
+                        {language === 'ru' ? article.title : (article.titleEn || article.title)}
+                      </h3>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                        <Clock className="w-3 h-3" />
+                        {(article as any).readTime || '5'} {t("knowledge.min")}
+                        <span>•</span>
+                        <span>{article.views || 0} {language === 'ru' ? 'просм.' : 'views'}</span>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
               <div className="text-center py-8 text-muted-foreground">
                 <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-50" />
                 <p>{t("knowledge.noResults")}</p>

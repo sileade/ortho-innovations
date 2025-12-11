@@ -52,6 +52,8 @@ export const translations: Translations = {
   "rehab.streak": { ru: "Серия", en: "Streak" },
   "rehab.days": { ru: "дней", en: "days" },
   "rehab.recoveryPhases": { ru: "Этапы восстановления", en: "Recovery Phases" },
+  "rehab.phases": { ru: "Этапы восстановления", en: "Recovery Phases" },
+  "rehab.noPlan": { ru: "План не назначен", en: "No plan assigned" },
   "rehab.completed": { ru: "Завершено", en: "Completed" },
   "rehab.inProgress": { ru: "В процессе", en: "In Progress" },
   "rehab.upcoming": { ru: "Предстоит", en: "Upcoming" },
@@ -119,6 +121,11 @@ export const translations: Translations = {
   "service.callClinic": { ru: "Позвонить", en: "Call Clinic" },
   "service.sendMessage": { ru: "Написать", en: "Send Message" },
   "service.getDirections": { ru: "Маршрут", en: "Get Directions" },
+  "service.adjustmentDesc": { ru: "Настройка посадки и выравнивания", en: "Fitting and alignment adjustment" },
+  "service.checkupDesc": { ru: "Плановый осмотр протеза", en: "Scheduled prosthesis inspection" },
+  "service.repairDesc": { ru: "Ремонт и замена компонентов", en: "Repair and component replacement" },
+  "service.emergency": { ru: "Экстренный", en: "Emergency" },
+  "service.emergencyDesc": { ru: "Срочный ремонт и помощь", en: "Urgent repair and assistance" },
   
   // Profile
   "profile.title": { ru: "Профиль", en: "Profile" },
@@ -204,6 +211,7 @@ export const translations: Translations = {
   // Admin Navigation
   "admin.nav.dashboard": { ru: "Главная", en: "Dashboard" },
   "admin.nav.patients": { ru: "Пациенты", en: "Patients" },
+  "admin.nav.rehabilitation": { ru: "Реабилитация", en: "Rehabilitation" },
   "admin.nav.content": { ru: "Контент", en: "Content" },
   "admin.nav.orders": { ru: "Заказы", en: "Orders" },
   "admin.nav.calendar": { ru: "Календарь", en: "Calendar" },
@@ -215,6 +223,10 @@ export const translations: Translations = {
   "admin.dashboard.recentPatients": { ru: "Последние пациенты", en: "Recent Patients" },
   "admin.dashboard.pendingTasks": { ru: "Ожидающие задачи", en: "Pending Tasks" },
   "admin.dashboard.tasks": { ru: "задач", en: "tasks" },
+  "admin.dashboard.totalPatients": { ru: "Всего пациентов", en: "Total Patients" },
+  "admin.dashboard.activeToday": { ru: "Активны сегодня", en: "Active Today" },
+  "admin.dashboard.pendingOrders": { ru: "Заявки в ожидании", en: "Pending Orders" },
+  "admin.dashboard.appointmentsToday": { ru: "Приёмов сегодня", en: "Appointments Today" },
   
   // Admin Stats
   "admin.stats.totalPatients": { ru: "Всего пациентов", en: "Total Patients" },

@@ -11,7 +11,8 @@ import {
   BellIcon,
   ChartIcon,
   SettingsIcon,
-  ServiceIcon
+  ServiceIcon,
+  RehabIcon
 } from "./NotionIcons";
 
 interface AdminLayoutProps {
@@ -22,6 +23,7 @@ interface AdminLayoutProps {
 const navItems = [
   { href: "/admin", icon: HomeIcon, labelKey: "admin.nav.dashboard" },
   { href: "/admin/patients", icon: UsersIcon, labelKey: "admin.nav.patients" },
+  { href: "/admin/rehabilitation", icon: RehabIcon, labelKey: "admin.nav.rehabilitation" },
   { href: "/admin/content", icon: FileIcon, labelKey: "admin.nav.content" },
   { href: "/admin/orders", icon: ServiceIcon, labelKey: "admin.nav.orders" },
   { href: "/admin/calendar", icon: CalendarIcon, labelKey: "admin.nav.calendar" },

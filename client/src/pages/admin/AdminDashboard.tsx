@@ -2,6 +2,8 @@ import { AdminLayout } from "@/components/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "wouter";
+import { trpc } from "@/lib/trpc";
+import { Skeleton } from "@/components/ui/skeleton";
 import { 
   UsersIcon, 
   CalendarIcon, 
@@ -12,58 +14,58 @@ import {
   BellIcon
 } from "@/components/NotionIcons";
 
-const stats = [
-  { 
-    key: "totalPatients", 
-    value: "1,247", 
-    change: "+12%",
-    icon: UsersIcon,
-    color: "text-primary",
-    bgColor: "bg-primary/10"
-  },
-  { 
-    key: "activeToday", 
-    value: "89", 
-    change: "+5%",
-    icon: ChartIcon,
-    color: "text-green-600",
-    bgColor: "bg-green-100 dark:bg-green-900/30"
-  },
-  { 
-    key: "pendingOrders", 
-    value: "23", 
-    change: "-3",
-    icon: ServiceIcon,
-    color: "text-orange-600",
-    bgColor: "bg-orange-100 dark:bg-orange-900/30"
-  },
-  { 
-    key: "appointmentsToday", 
-    value: "15", 
-    change: "",
-    icon: CalendarIcon,
-    color: "text-blue-600",
-    bgColor: "bg-blue-100 dark:bg-blue-900/30"
-  },
-];
-
-const recentPatients = [
-  { id: 1, name: "Иванов Петр", status: "active", lastVisit: "Сегодня", progress: 78 },
-  { id: 2, name: "Сидорова Анна", status: "active", lastVisit: "Вчера", progress: 45 },
-  { id: 3, name: "Козлов Михаил", status: "pending", lastVisit: "3 дня назад", progress: 92 },
-  { id: 4, name: "Петрова Елена", status: "active", lastVisit: "Сегодня", progress: 33 },
-  { id: 5, name: "Николаев Сергей", status: "inactive", lastVisit: "2 недели назад", progress: 67 },
-];
-
-const pendingTasks = [
-  { id: 1, type: "verification", patient: "Новый пациент #1247", time: "10 мин назад" },
-  { id: 2, type: "order", patient: "Заявка на сервис #892", time: "25 мин назад" },
-  { id: 3, type: "plan", patient: "План реабилитации для Иванова П.", time: "1 час назад" },
-  { id: 4, type: "notification", patient: "Массовая рассылка", time: "2 часа назад" },
-];
-
 export default function AdminDashboard() {
   const { t, language } = useLanguage();
+
+  // Fetch admin dashboard data from API
+  const { data: dashboardStats, isLoading: statsLoading } = trpc.admin.getDashboardStats.useQuery();
+  const { data: recentPatients, isLoading: patientsLoading } = trpc.admin.getPatients.useQuery();
+  // Pending tasks - using orders as proxy
+  const { data: pendingOrders, isLoading: tasksLoading } = trpc.admin.getOrders.useQuery();
+  const pendingTasks = (pendingOrders || []).slice(0, 5).map((o: any) => ({
+    id: o.id,
+    type: 'order',
+    title: o.serviceType || 'Заявка на сервис',
+    patient: o.patientName || 'Patient',
+    time: o.createdAt ? new Date(o.createdAt).toLocaleString() : ''
+  }));
+
+  const stats = [
+    { 
+      key: "totalPatients", 
+      value: dashboardStats?.totalPatients?.toString() || "0", 
+      change: "+0%",
+      icon: UsersIcon,
+      color: "text-primary",
+      bgColor: "bg-primary/10"
+    },
+    { 
+      key: "activeToday", 
+      value: dashboardStats?.activeRehabPlans?.toString() || "0", 
+      change: "+0%",
+      icon: ChartIcon,
+      color: "text-green-600",
+      bgColor: "bg-green-100 dark:bg-green-900/30"
+    },
+    { 
+      key: "pendingOrders", 
+      value: dashboardStats?.pendingOrders?.toString() || "0", 
+      change: "0",
+      icon: ServiceIcon,
+      color: "text-orange-600",
+      bgColor: "bg-orange-100 dark:bg-orange-900/30"
+    },
+    { 
+      key: "appointmentsToday", 
+      value: dashboardStats?.todayAppointments?.toString() || "0", 
+      change: "",
+      icon: CalendarIcon,
+      color: "text-blue-600",
+      bgColor: "bg-blue-100 dark:bg-blue-900/30"
+    },
+  ];
+
+  const isLoading = statsLoading;
 
   return (
     <AdminLayout title={t("admin.dashboard.title")}>
@@ -78,17 +80,21 @@ export default function AdminDashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground">
-                        {t(`admin.stats.${stat.key}`)}
+                        {t(`admin.dashboard.${stat.key}`)}
                       </p>
-                      <p className="text-3xl font-bold mt-1">{stat.value}</p>
+                      {isLoading ? (
+                        <Skeleton className="h-8 w-20 mt-1" />
+                      ) : (
+                        <p className="text-2xl font-bold mt-1">{stat.value}</p>
+                      )}
                       {stat.change && (
-                        <p className={`text-sm mt-1 ${stat.change.startsWith('+') ? 'text-green-600' : stat.change.startsWith('-') ? 'text-red-600' : 'text-muted-foreground'}`}>
-                          {stat.change} {t("admin.stats.vsLastMonth")}
+                        <p className={`text-xs mt-1 ${stat.change.startsWith('+') ? 'text-green-600' : stat.change.startsWith('-') ? 'text-red-600' : 'text-muted-foreground'}`}>
+                          {stat.change} {language === 'ru' ? 'за неделю' : 'this week'}
                         </p>
                       )}
                     </div>
-                    <div className={`w-14 h-14 rounded-xl ${stat.bgColor} flex items-center justify-center`}>
-                      <Icon size={28} className={stat.color} />
+                    <div className={`w-12 h-12 rounded-xl ${stat.bgColor} flex items-center justify-center`}>
+                      <Icon size={24} className={stat.color} />
                     </div>
                   </div>
                 </CardContent>
@@ -97,56 +103,91 @@ export default function AdminDashboard() {
           })}
         </div>
 
-        {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Recent Patients */}
           <div className="lg:col-span-2">
             <Card className="border-none shadow-sm">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-lg font-semibold">
-                  {t("admin.dashboard.recentPatients")}
+                <CardTitle className="text-lg font-bold">
+                  {language === 'ru' ? 'Недавние пациенты' : 'Recent Patients'}
                 </CardTitle>
-                <Link 
-                  href="/admin/patients" 
-                  className="text-sm text-primary font-medium flex items-center gap-1 hover:underline"
-                >
-                  {t("rehab.viewAll")}
-                  <ChevronRightIcon size={16} />
+                <Link href="/admin/patients">
+                  <span className="text-sm text-primary hover:underline flex items-center gap-1">
+                    {t("rehab.viewAll")}
+                    <ChevronRightIcon size={16} />
+                  </span>
                 </Link>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {recentPatients.map((patient) => (
-                    <Link key={patient.id} href={`/admin/patients/${patient.id}`}>
-                      <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-muted transition-colors cursor-pointer">
-                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                          <UsersIcon size={20} className="text-primary" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{patient.name}</p>
-                          <p className="text-sm text-muted-foreground">{patient.lastVisit}</p>
-                        </div>
-                        <div className="text-right">
-                          <div className="flex items-center gap-2">
-                            <div className="w-20 h-2 rounded-full bg-muted overflow-hidden">
-                              <div 
-                                className="h-full bg-primary rounded-full transition-all"
-                                style={{ width: `${patient.progress}%` }}
-                              />
-                            </div>
-                            <span className="text-sm font-medium w-10">{patient.progress}%</span>
+                  {patientsLoading ? (
+                    Array.from({ length: 5 }).map((_, i) => (
+                      <div key={i} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Skeleton className="w-10 h-10 rounded-full" />
+                          <div>
+                            <Skeleton className="h-5 w-32 mb-1" />
+                            <Skeleton className="h-4 w-20" />
                           </div>
-                          <span className={`text-xs ${
-                            patient.status === 'active' ? 'text-green-600' : 
-                            patient.status === 'pending' ? 'text-orange-600' : 'text-muted-foreground'
-                          }`}>
-                            {patient.status === 'active' ? t("admin.status.active") : 
-                             patient.status === 'pending' ? t("admin.status.pending") : t("admin.status.inactive")}
-                          </span>
                         </div>
+                        <Skeleton className="h-6 w-16" />
                       </div>
-                    </Link>
-                  ))}
+                    ))
+                  ) : recentPatients && recentPatients.length > 0 ? (
+                    recentPatients.map((patient: any) => (
+                      <Link key={patient.id} href={`/admin/patients/${patient.id}`}>
+                        <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors cursor-pointer">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                              <span className="text-sm font-semibold text-primary">
+                                {patient.name?.charAt(0) || 'P'}
+                              </span>
+                            </div>
+                            <div>
+                              <p className="font-medium">{patient.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {patient.lastVisit 
+                                  ? (language === 'ru' ? 'Последний визит: ' : 'Last visit: ') + 
+                                    new Date(patient.lastVisit).toLocaleDateString(language === 'ru' ? 'ru-RU' : 'en-US')
+                                  : (language === 'ru' ? 'Нет визитов' : 'No visits')
+                                }
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="text-right">
+                              <p className="text-sm font-medium">{patient.progress || 0}%</p>
+                              <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
+                                <div 
+                                  className="h-full bg-primary transition-all"
+                                  style={{ width: `${patient.progress || 0}%` }}
+                                />
+                              </div>
+                            </div>
+                            <span className={`px-2 py-1 rounded text-xs font-medium ${
+                              patient.status === 'active' 
+                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                : patient.status === 'pending'
+                                ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                                : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
+                            }`}>
+                              {patient.status === 'active' 
+                                ? (language === 'ru' ? 'Активен' : 'Active')
+                                : patient.status === 'pending'
+                                ? (language === 'ru' ? 'Ожидание' : 'Pending')
+                                : (language === 'ru' ? 'Неактивен' : 'Inactive')
+                              }
+                            </span>
+                          </div>
+                        </div>
+                      </Link>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <UsersIcon size={48} className="mx-auto mb-4 opacity-50" />
+                      <p>{language === 'ru' ? 'Нет пациентов' : 'No patients'}</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -156,58 +197,83 @@ export default function AdminDashboard() {
           <div>
             <Card className="border-none shadow-sm">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-lg font-semibold">
-                  {t("admin.dashboard.pendingTasks")}
+                <CardTitle className="text-lg font-bold">
+                  {language === 'ru' ? 'Задачи' : 'Tasks'}
                 </CardTitle>
-                <span className="text-sm text-muted-foreground">
-                  {pendingTasks.length} {t("admin.dashboard.tasks")}
+                <span className="px-2 py-1 bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 rounded text-xs font-medium">
+                  {pendingTasks?.length || 0}
                 </span>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {pendingTasks.map((task) => (
-                    <div key={task.id} className="flex items-start gap-3 p-3 rounded-xl hover:bg-muted transition-colors cursor-pointer">
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                        task.type === 'verification' ? 'bg-blue-100 dark:bg-blue-900/30' :
-                        task.type === 'order' ? 'bg-orange-100 dark:bg-orange-900/30' :
-                        task.type === 'plan' ? 'bg-green-100 dark:bg-green-900/30' :
-                        'bg-purple-100 dark:bg-purple-900/30'
-                      }`}>
-                        {task.type === 'verification' ? <UsersIcon size={16} className="text-blue-600" /> :
-                         task.type === 'order' ? <ServiceIcon size={16} className="text-orange-600" /> :
-                         task.type === 'plan' ? <TrophyIcon size={16} className="text-green-600" /> :
-                         <BellIcon size={16} className="text-purple-600" />}
+                  {tasksLoading ? (
+                    Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="p-3 bg-muted/50 rounded-lg">
+                        <Skeleton className="h-5 w-full mb-2" />
+                        <Skeleton className="h-4 w-20" />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{task.patient}</p>
-                        <p className="text-xs text-muted-foreground">{task.time}</p>
+                    ))
+                  ) : pendingTasks && pendingTasks.length > 0 ? (
+                    pendingTasks.slice(0, 5).map((task: any) => (
+                      <div key={task.id} className="p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors cursor-pointer">
+                        <div className="flex items-start gap-2">
+                          <div className={`w-2 h-2 rounded-full mt-1.5 ${
+                            task.type === 'verification' ? 'bg-blue-500' :
+                            task.type === 'order' ? 'bg-orange-500' :
+                            task.type === 'plan' ? 'bg-green-500' :
+                            'bg-purple-500'
+                          }`} />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">{task.title || task.patient}</p>
+                            <p className="text-xs text-muted-foreground">{task.time}</p>
+                          </div>
+                        </div>
                       </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <TrophyIcon size={32} className="mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">{language === 'ru' ? 'Нет задач' : 'No tasks'}</p>
                     </div>
-                  ))}
+                  )}
                 </div>
               </CardContent>
             </Card>
 
             {/* Quick Actions */}
-            <Card className="border-none shadow-sm mt-4">
+            <Card className="border-none shadow-sm mt-6">
               <CardHeader className="pb-2">
-                <CardTitle className="text-lg font-semibold">
-                  {t("dashboard.quickActions")}
+                <CardTitle className="text-lg font-bold">
+                  {language === 'ru' ? 'Быстрые действия' : 'Quick Actions'}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
-                <Link href="/admin/patients/new">
-                  <button className="w-full flex items-center gap-3 p-3 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
-                    <UsersIcon size={20} />
-                    <span className="font-medium">{t("admin.actions.addPatient")}</span>
-                  </button>
-                </Link>
-                <Link href="/admin/content/new">
-                  <button className="w-full flex items-center gap-3 p-3 rounded-xl bg-muted hover:bg-muted/80 transition-colors">
-                    <BellIcon size={20} />
-                    <span className="font-medium">{t("admin.actions.sendNotification")}</span>
-                  </button>
-                </Link>
+              <CardContent>
+                <div className="space-y-2">
+                  <Link href="/admin/patients">
+                    <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors cursor-pointer">
+                      <UsersIcon size={20} className="text-primary" />
+                      <span className="text-sm font-medium">
+                        {language === 'ru' ? 'Добавить пациента' : 'Add Patient'}
+                      </span>
+                    </div>
+                  </Link>
+                  <Link href="/admin/rehabilitation">
+                    <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors cursor-pointer">
+                      <ChartIcon size={20} className="text-green-600" />
+                      <span className="text-sm font-medium">
+                        {language === 'ru' ? 'Создать план' : 'Create Plan'}
+                      </span>
+                    </div>
+                  </Link>
+                  <Link href="/admin/notifications">
+                    <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors cursor-pointer">
+                      <BellIcon size={20} className="text-orange-600" />
+                      <span className="text-sm font-medium">
+                        {language === 'ru' ? 'Отправить рассылку' : 'Send Notification'}
+                      </span>
+                    </div>
+                  </Link>
+                </div>
               </CardContent>
             </Card>
           </div>

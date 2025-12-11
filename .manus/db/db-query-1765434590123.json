@@ -1,0 +1,9 @@
+{
+  "query": "SELECT * FROM patients LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user m5gBgwdCwANyXUV.7565e41de507 --database YfUiApmmg5pEpSHb6hMb9y --execute SELECT * FROM patients LIMIT 5;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 58
+}

@@ -9,6 +9,8 @@ import {
   FireIcon
 } from "@/components/NotionIcons";
 import { Download } from "lucide-react";
+import { trpc } from "@/lib/trpc";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const kpis = [
   { key: "mau", value: "437", target: "35%", achieved: true, description: "активных пользователей в месяц" },

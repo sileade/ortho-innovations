@@ -1,0 +1,28 @@
+{
+  "query": "SELECT * FROM patients LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user m5gBgwdCwANyXUV.7565e41de507 --database YfUiApmmg5pEpSHb6hMb9y --execute SELECT * FROM patients LIMIT 5;",
+  "rows": [
+    {
+      "id": "1",
+      "userId": "1",
+      "medicalId": "P00001",
+      "dateOfBirth": "NULL",
+      "bloodType": "NULL",
+      "phone": "NULL",
+      "address": "NULL",
+      "emergencyContactName": "NULL",
+      "emergencyContactPhone": "NULL",
+      "insuranceProvider": "NULL",
+      "insuranceNumber": "NULL",
+      "createdAt": "2025-12-11 06:31:01",
+      "updatedAt": "2025-12-11 06:31:01",
+      "firstName": "Home",
+      "lastName": "page",
+      "status": "active"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tuserId\tmedicalId\tdateOfBirth\tbloodType\tphone\taddress\temergencyContactName\temergencyContactPhone\tinsuranceProvider\tinsuranceNumber\tcreatedAt\tupdatedAt\tfirstName\tlastName\tstatus\n1\t1\tP00001\tNULL\tNULL\tNULL\tNULL\tNULL\tNULL\tNULL\tNULL\t2025-12-11 06:31:01\t2025-12-11 06:31:01\tHome\tpage\tactive\n",
+  "stderr": "",
+  "execution_time_ms": 52
+}

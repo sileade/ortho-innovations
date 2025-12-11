@@ -101,6 +101,39 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
+// Ensure patient record exists for user
+export async function ensurePatientExists(openId: string, name: string | null) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  // Get user by openId
+  const userResult = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
+  if (userResult.length === 0) return null;
+  
+  const user = userResult[0];
+  
+  // Check if patient already exists
+  const existingPatient = await db.select().from(patients).where(eq(patients.userId, user.id)).limit(1);
+  if (existingPatient.length > 0) return existingPatient[0];
+  
+  // Create new patient record
+  const firstName = name?.split(' ')[0] || 'Пациент';
+  const lastName = name?.split(' ').slice(1).join(' ') || '';
+  const medicalId = `P${String(user.id).padStart(5, '0')}`;
+  
+  await db.insert(patients).values({
+    userId: user.id,
+    medicalId,
+    firstName,
+    lastName,
+    status: 'active',
+  });
+  
+  // Return the newly created patient
+  const newPatient = await db.select().from(patients).where(eq(patients.userId, user.id)).limit(1);
+  return newPatient.length > 0 ? newPatient[0] : null;
+}
+
 // Patient queries
 export async function getPatientByUserId(userId: number) {
   const db = await getDb();
@@ -446,4 +479,437 @@ export async function createTask(data: {
   });
   
   return { id: result[0].insertId, ...data, completed: false };
+}
+
+
+// ==================== ADMIN FUNCTIONS ====================
+
+// Get all patients with optional filtering
+export async function getAllPatients(filters?: {
+  search?: string;
+  status?: 'active' | 'inactive' | 'all';
+}) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const conditions = [];
+  
+  if (filters?.search) {
+    conditions.push(
+      or(
+        like(patients.firstName, `%${filters.search}%`),
+        like(patients.lastName, `%${filters.search}%`)
+      )!
+    );
+  }
+  
+  if (filters?.status && filters.status !== 'all') {
+    conditions.push(eq(patients.status, filters.status));
+  }
+  
+  const query = conditions.length > 0 
+    ? db.select().from(patients).where(and(...conditions))
+    : db.select().from(patients);
+  
+  return query.orderBy(desc(patients.createdAt));
+}
+
+// Get patient by ID with full details
+export async function getPatientById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.select().from(patients).where(eq(patients.id, id)).limit(1);
+  if (result.length === 0) return null;
+  
+  const patient = result[0];
+  
+  // Get related data
+  const [prosthesis, rehabPlan, appointmentsList] = await Promise.all([
+    db.select().from(prostheses).where(eq(prostheses.patientId, id)).limit(1),
+    db.select().from(rehabilitationPlans).where(eq(rehabilitationPlans.patientId, id)).limit(1),
+    db.select().from(appointments).where(eq(appointments.patientId, id)).orderBy(desc(appointments.scheduledAt)).limit(10),
+  ]);
+  
+  return {
+    ...patient,
+    prosthesis: prosthesis[0] || null,
+    rehabPlan: rehabPlan[0] || null,
+    appointments: appointmentsList,
+  };
+}
+
+// Get all rehabilitation plans
+export async function getAllRehabPlans(filters?: {
+  status?: 'active' | 'paused' | 'completed' | 'all';
+}) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const conditions = [];
+  
+  if (filters?.status && filters.status !== 'all') {
+    conditions.push(eq(rehabilitationPlans.status, filters.status));
+  }
+  
+  const query = conditions.length > 0
+    ? db.select().from(rehabilitationPlans).where(and(...conditions))
+    : db.select().from(rehabilitationPlans);
+  
+  return query.orderBy(desc(rehabilitationPlans.createdAt));
+}
+
+// Create rehabilitation plan
+export async function createRehabPlan(data: {
+  patientId: number;
+  title: string;
+  duration: number;
+  prosthesisType: string;
+  assignedDoctor: string;
+}) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.insert(rehabilitationPlans).values({
+    patientId: data.patientId,
+    name: data.title, // Required field
+    title: data.title,
+    duration: data.duration,
+    prosthesisType: data.prosthesisType,
+    assignedDoctor: data.assignedDoctor,
+    status: 'active',
+    progress: 0,
+    startDate: new Date(),
+  });
+  
+  return { id: result[0].insertId, ...data, status: 'active' };
+}
+
+// Update rehabilitation plan status
+export async function updateRehabPlanStatus(id: number, status: 'active' | 'paused' | 'completed') {
+  const db = await getDb();
+  if (!db) return null;
+  
+  await db.update(rehabilitationPlans)
+    .set({ status })
+    .where(eq(rehabilitationPlans.id, id));
+  
+  return { id, status };
+}
+
+// Get all content (articles, videos, exercises)
+export async function getAllContent(filters?: {
+  type?: 'article' | 'video' | 'exercise' | 'all';
+  category?: string;
+  status?: 'published' | 'draft' | 'all';
+}) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const conditions = [];
+  
+  if (filters?.type && filters.type !== 'all') {
+    conditions.push(eq(articles.type, filters.type));
+  }
+  
+  if (filters?.category) {
+    conditions.push(eq(articles.category, filters.category as "exercises" | "nutrition" | "recovery" | "faq"));
+  }
+  
+  if (filters?.status && filters.status !== 'all') {
+    conditions.push(eq(articles.published, filters.status === 'published'));
+  }
+  
+  const query = conditions.length > 0
+    ? db.select().from(articles).where(and(...conditions))
+    : db.select().from(articles);
+  
+  return query.orderBy(desc(articles.createdAt));
+}
+
+// Create content
+export async function createContent(data: {
+  titleRu: string;
+  titleEn: string;
+  type: 'article' | 'video' | 'exercise';
+  category: string;
+  content?: string;
+}) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.insert(articles).values({
+    title: data.titleRu,
+    titleEn: data.titleEn,
+    type: data.type,
+    category: data.category as "exercises" | "nutrition" | "recovery" | "faq",
+    content: data.content,
+    published: false,
+    views: 0,
+  });
+  
+  return { id: result[0].insertId, ...data, published: false };
+}
+
+// Update content
+export async function updateContent(id: number, data: {
+  titleRu?: string;
+  titleEn?: string;
+  category?: string;
+  status?: 'published' | 'draft';
+}) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const updateData: Record<string, unknown> = {};
+  if (data.titleRu !== undefined) updateData.title = data.titleRu;
+  if (data.titleEn !== undefined) updateData.titleEn = data.titleEn;
+  if (data.category !== undefined) updateData.category = data.category;
+  if (data.status !== undefined) updateData.published = data.status === 'published';
+  
+  if (Object.keys(updateData).length === 0) return null;
+  
+  await db.update(articles)
+    .set(updateData)
+    .where(eq(articles.id, id));
+  
+  return { id, ...data };
+}
+
+// Delete content
+export async function deleteContent(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  await db.delete(articles).where(eq(articles.id, id));
+  return { id, deleted: true };
+}
+
+// Get all orders/service requests
+export async function getAllOrders(filters?: {
+  status?: 'pending' | 'scheduled' | 'in_progress' | 'completed' | 'cancelled' | 'all';
+}) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const conditions = [];
+  
+  if (filters?.status && filters.status !== 'all') {
+    conditions.push(eq(serviceRequests.status, filters.status));
+  }
+  
+  // Get service requests with patient data
+  const requests = conditions.length > 0
+    ? await db.select().from(serviceRequests).where(and(...conditions)).orderBy(desc(serviceRequests.createdAt))
+    : await db.select().from(serviceRequests).orderBy(desc(serviceRequests.createdAt));
+  
+  // Map to expected format with patient info
+  const ordersWithPatients = await Promise.all(requests.map(async (request) => {
+    // Get patient info
+    const patientResult = await db.select().from(patients).where(eq(patients.id, request.patientId)).limit(1);
+    const patient = patientResult[0];
+    
+    // Map service type to display names
+    const serviceNames: Record<string, { ru: string; en: string }> = {
+      'adjustment': { ru: 'Настройка протеза', en: 'Prosthesis Adjustment' },
+      'checkup': { ru: 'Осмотр', en: 'Check-up' },
+      'repair': { ru: 'Ремонт протеза', en: 'Prosthesis Repair' },
+      'consultation': { ru: 'Консультация', en: 'Consultation' },
+    };
+    
+    // Map status from DB to frontend format
+    const statusMap: Record<string, string> = {
+      'pending': 'pending',
+      'scheduled': 'confirmed',
+      'in_progress': 'in-progress',
+      'completed': 'completed',
+      'cancelled': 'cancelled',
+    };
+    
+    return {
+      id: request.id,
+      orderNumber: `ORD-${String(request.id).padStart(4, '0')}`,
+      patient: {
+        name: patient ? `${patient.firstName || ''} ${patient.lastName || ''}`.trim() || 'Пациент' : 'Пациент',
+        phone: patient?.phone || '',
+        email: '',
+      },
+      service: serviceNames[request.type || 'checkup'] || { ru: 'Услуга', en: 'Service' },
+      date: request.scheduledDate ? new Date(request.scheduledDate).toISOString().split('T')[0] : '',
+      time: request.scheduledDate ? new Date(request.scheduledDate).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) : '',
+      status: statusMap[request.status || 'pending'] || 'pending',
+      specialist: request.technicianName || 'Не назначен',
+      notes: request.notes || '',
+      price: 0,
+    };
+  }));
+  
+  return ordersWithPatients;
+}
+
+// Update order status
+export async function updateOrderStatus(id: number, status: 'pending' | 'scheduled' | 'in_progress' | 'completed' | 'cancelled') {
+  const db = await getDb();
+  if (!db) return null;
+  
+  await db.update(serviceRequests)
+    .set({ status })
+    .where(eq(serviceRequests.id, id));
+  
+  return { id, status };
+}
+
+// Get calendar appointments for admin
+export async function getCalendarAppointments(startDate: string, endDate: string) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select()
+    .from(appointments)
+    .where(and(
+      sql`${appointments.scheduledAt} >= ${new Date(startDate)}`,
+      sql`${appointments.scheduledAt} <= ${new Date(endDate)}`
+    ))
+    .orderBy(appointments.scheduledAt);
+}
+
+// Create broadcast notification
+export async function createBroadcastNotification(data: {
+  titleRu: string;
+  titleEn: string;
+  messageRu: string;
+  messageEn: string;
+  type: 'info' | 'reminder' | 'alert' | 'success';
+  audience: 'all' | 'active' | 'specific';
+  patientIds?: number[];
+  scheduledFor?: string;
+}) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  // Get target users based on audience
+  let targetUserIds: number[] = [];
+  
+  if (data.audience === 'all' || data.audience === 'active') {
+    const patientsList = await db.select({ userId: patients.userId })
+      .from(patients)
+      .where(data.audience === 'active' ? eq(patients.status, 'active') : sql`1=1`);
+    targetUserIds = patientsList.map(p => p.userId!).filter(Boolean);
+  } else if (data.patientIds && data.patientIds.length > 0) {
+    const patientsList = await db.select({ userId: patients.userId })
+      .from(patients)
+      .where(sql`${patients.id} IN (${data.patientIds.join(',')})`);
+    targetUserIds = patientsList.map(p => p.userId!).filter(Boolean);
+  }
+  
+  // Create notifications for all target users
+  const notificationsToInsert = targetUserIds.map(userId => ({
+    userId,
+    title: data.titleRu,
+    message: data.messageRu,
+    type: data.type,
+    read: false,
+  }));
+  
+  if (notificationsToInsert.length > 0) {
+    await db.insert(notifications).values(notificationsToInsert);
+  }
+  
+  return { 
+    sent: notificationsToInsert.length, 
+    audience: data.audience,
+    scheduledFor: data.scheduledFor 
+  };
+}
+
+// Get sent notifications (admin view)
+export async function getSentNotifications() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Get recent unique notifications grouped by title
+  return db.select()
+    .from(notifications)
+    .orderBy(desc(notifications.createdAt))
+    .limit(100);
+}
+
+// Get analytics data
+export async function getAnalyticsData(period: 'week' | 'month' | 'year') {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const now = new Date();
+  let startDate: Date;
+  
+  switch (period) {
+    case 'week':
+      startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      break;
+    case 'month':
+      startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      break;
+    case 'year':
+      startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+      break;
+  }
+  
+  const [
+    totalPatients,
+    activePatients,
+    totalAppointments,
+    completedTasks,
+    serviceRequestsCount
+  ] = await Promise.all([
+    db.select({ count: sql<number>`count(*)` }).from(patients),
+    db.select({ count: sql<number>`count(*)` }).from(patients).where(eq(patients.status, 'active')),
+    db.select({ count: sql<number>`count(*)` }).from(appointments).where(sql`${appointments.scheduledAt} >= ${startDate}`),
+    db.select({ count: sql<number>`count(*)` }).from(tasks).where(and(eq(tasks.completed, true), sql`${tasks.completedAt} >= ${startDate}`)),
+    db.select({ count: sql<number>`count(*)` }).from(serviceRequests).where(sql`${serviceRequests.createdAt} >= ${startDate}`),
+  ]);
+  
+  return {
+    totalPatients: totalPatients[0]?.count || 0,
+    activePatients: activePatients[0]?.count || 0,
+    totalAppointments: totalAppointments[0]?.count || 0,
+    completedTasks: completedTasks[0]?.count || 0,
+    serviceRequests: serviceRequestsCount[0]?.count || 0,
+    period,
+  };
+}
+
+// Get admin dashboard stats
+export async function getAdminDashboardStats() {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  
+  const [
+    totalPatients,
+    activeRehabPlans,
+    todayAppointments,
+    pendingOrders,
+    recentArticles
+  ] = await Promise.all([
+    db.select({ count: sql<number>`count(*)` }).from(patients),
+    db.select({ count: sql<number>`count(*)` }).from(rehabilitationPlans).where(eq(rehabilitationPlans.status, 'active')),
+    db.select({ count: sql<number>`count(*)` }).from(appointments).where(and(
+      sql`${appointments.scheduledAt} >= ${today}`,
+      sql`${appointments.scheduledAt} < ${tomorrow}`
+    )),
+    db.select({ count: sql<number>`count(*)` }).from(serviceRequests).where(eq(serviceRequests.status, 'pending')),
+    db.select({ count: sql<number>`count(*)` }).from(articles).where(eq(articles.published, true)),
+  ]);
+  
+  return {
+    totalPatients: totalPatients[0]?.count || 0,
+    activeRehabPlans: activeRehabPlans[0]?.count || 0,
+    todayAppointments: todayAppointments[0]?.count || 0,
+    pendingOrders: pendingOrders[0]?.count || 0,
+    publishedArticles: recentArticles[0]?.count || 0,
+  };
 }

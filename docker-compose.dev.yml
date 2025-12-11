@@ -1,0 +1,52 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ortho-patient-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://ortho:${DB_PASSWORD}@db:5432/ortho_patient
+      - JWT_SECRET=${JWT_SECRET}
+      - VITE_APP_TITLE=${VITE_APP_TITLE:-Ortho Innovations}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - ortho-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  db:
+    image: postgres:16-alpine
+    container_name: ortho-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=ortho
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=ortho_patient
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - ortho-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ortho -d ortho_patient"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+
+networks:
+  ortho-network:
+    driver: bridge

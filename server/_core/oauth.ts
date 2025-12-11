@@ -36,6 +36,9 @@ export function registerOAuthRoutes(app: Express) {
         lastSignedIn: new Date(),
       });
 
+      // Ensure patient record exists for this user
+      await db.ensurePatientExists(userInfo.openId, userInfo.name || null);
+
       const sessionToken = await sdk.createSessionToken(userInfo.openId, {
         name: userInfo.name || "",
         expiresInMs: ONE_YEAR_MS,

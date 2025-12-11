@@ -23,7 +23,15 @@ export const appRouter = router({
   // Patient profile procedures
   patient: router({
     getProfile: protectedProcedure.query(async ({ ctx }) => {
-      return db.getPatientByUserId(ctx.user.id);
+      // Try to get existing patient
+      let patient = await db.getPatientByUserId(ctx.user.id);
+      
+      // If no patient exists, create one
+      if (!patient && ctx.user.openId) {
+        patient = await db.ensurePatientExists(ctx.user.openId, ctx.user.name || null);
+      }
+      
+      return patient;
     }),
     
     updateProfile: protectedProcedure
@@ -209,6 +217,11 @@ export const appRouter = router({
       const completedToday = todaysTasks.filter(t => t.completed).length;
       const totalToday = todaysTasks.length;
       
+      // Calculate day of recovery from plan start date
+      const dayOfRecovery = plan?.startDate 
+        ? Math.ceil((Date.now() - new Date(plan.startDate).getTime()) / (1000 * 60 * 60 * 24))
+        : 1;
+      
       return {
         patient,
         prosthesis,
@@ -216,12 +229,170 @@ export const appRouter = router({
         todaysTasks,
         nextAppointment: appointments[0] || null,
         dailyProgress: totalToday > 0 ? Math.round((completedToday / totalToday) * 100) : 0,
+        dayOfRecovery: Math.max(1, dayOfRecovery),
       };
     }),
   }),
 
   // Admin routes for doctors to manage patient schedules
   admin: router({
+    // Get all patients
+    getPatients: protectedProcedure
+      .input(z.object({
+        search: z.string().optional(),
+        status: z.enum(['active', 'inactive', 'all']).optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        return db.getAllPatients(input);
+      }),
+
+    // Get patient by ID
+    getPatient: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return db.getPatientById(input.id);
+      }),
+
+    // Get all rehabilitation plans
+    getRehabPlans: protectedProcedure
+      .input(z.object({
+        status: z.enum(['active', 'paused', 'completed', 'all']).optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        return db.getAllRehabPlans(input);
+      }),
+
+    // Create rehabilitation plan
+    createRehabPlan: protectedProcedure
+      .input(z.object({
+        patientId: z.number(),
+        title: z.string(),
+        duration: z.number(),
+        prosthesisType: z.string(),
+        assignedDoctor: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        return db.createRehabPlan(input);
+      }),
+
+    // Update rehabilitation plan status
+    updateRehabPlanStatus: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        status: z.enum(['active', 'paused', 'completed']),
+      }))
+      .mutation(async ({ input }) => {
+        return db.updateRehabPlanStatus(input.id, input.status);
+      }),
+
+    // Get all content (articles, videos, exercises)
+    getContent: protectedProcedure
+      .input(z.object({
+        type: z.enum(['article', 'video', 'exercise', 'all']).optional(),
+        category: z.string().optional(),
+        status: z.enum(['published', 'draft', 'all']).optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        return db.getAllContent(input);
+      }),
+
+    // Create content
+    createContent: protectedProcedure
+      .input(z.object({
+        titleRu: z.string(),
+        titleEn: z.string(),
+        type: z.enum(['article', 'video', 'exercise']),
+        category: z.string(),
+        content: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return db.createContent(input);
+      }),
+
+    // Update content
+    updateContent: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        titleRu: z.string().optional(),
+        titleEn: z.string().optional(),
+        category: z.string().optional(),
+        status: z.enum(['published', 'draft']).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return db.updateContent(input.id, input);
+      }),
+
+    // Delete content
+    deleteContent: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return db.deleteContent(input.id);
+      }),
+
+    // Get all orders/service requests
+    getOrders: protectedProcedure
+      .input(z.object({
+        status: z.enum(['pending', 'scheduled', 'in_progress', 'completed', 'cancelled', 'all']).optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        return db.getAllOrders(input);
+      }),
+
+    // Update order status
+    updateOrderStatus: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        status: z.enum(['pending', 'scheduled', 'in_progress', 'completed', 'cancelled']),
+      }))
+      .mutation(async ({ input }) => {
+        return db.updateOrderStatus(input.id, input.status);
+      }),
+
+    // Get calendar appointments for admin
+    getCalendarAppointments: protectedProcedure
+      .input(z.object({
+        startDate: z.string(),
+        endDate: z.string(),
+      }))
+      .query(async ({ input }) => {
+        return db.getCalendarAppointments(input.startDate, input.endDate);
+      }),
+
+    // Send notification to patients
+    sendNotification: protectedProcedure
+      .input(z.object({
+        titleRu: z.string(),
+        titleEn: z.string(),
+        messageRu: z.string(),
+        messageEn: z.string(),
+        type: z.enum(['info', 'reminder', 'alert', 'success']),
+        audience: z.enum(['all', 'active', 'specific']),
+        patientIds: z.array(z.number()).optional(),
+        scheduledFor: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return db.createBroadcastNotification(input);
+      }),
+
+    // Get sent notifications
+    getSentNotifications: protectedProcedure.query(async () => {
+      return db.getSentNotifications();
+    }),
+
+    // Get analytics data
+    getAnalytics: protectedProcedure
+      .input(z.object({
+        period: z.enum(['week', 'month', 'year']).optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        return db.getAnalyticsData(input?.period || 'month');
+      }),
+
+    // Get dashboard stats
+    getDashboardStats: protectedProcedure.query(async () => {
+      return db.getAdminDashboardStats();
+      }),
+
     // Trigger calendar sync when doctor updates schedule
     syncPatientCalendar: protectedProcedure
       .input(z.object({

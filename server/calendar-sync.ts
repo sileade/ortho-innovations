@@ -128,6 +128,18 @@ export async function syncPatientCalendar(
     }
 
     const userId = patient[0].userId;
+    
+    if (!userId) {
+      return {
+        success: false,
+        patientId,
+        userId: 0,
+        eventType,
+        message: 'Patient has no associated user',
+        calendarFeedUpdated: false,
+        notificationSent: false,
+      };
+    }
 
     // Update last sync time (triggers ICS feed regeneration)
     lastSyncTimes.set(patientId, new Date());

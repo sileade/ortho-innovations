@@ -1,0 +1,13 @@
+{
+  "query": "SHOW TABLES LIKE '%service%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user m5gBgwdCwANyXUV.7565e41de507 --database YfUiApmmg5pEpSHb6hMb9y --execute SHOW TABLES LIKE '%service%';",
+  "rows": [
+    {
+      "Tables_in_YfUiApmmg5pEpSHb6hMb9y (%service%)": "serviceRequests"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_YfUiApmmg5pEpSHb6hMb9y (%service%)\nserviceRequests\n",
+  "stderr": "",
+  "execution_time_ms": 51
+}

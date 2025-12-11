@@ -141,7 +141,7 @@ export async function getEventsNeedingReminders(): Promise<ReminderEvent[]> {
           .where(eq(patients.id, apt.patientId))
           .limit(1);
 
-        if (patient[0]) {
+        if (patient[0] && patient[0].userId) {
           events.push({
             id: apt.id,
             type: 'appointment',
@@ -208,7 +208,7 @@ export async function getEventsNeedingReminders(): Promise<ReminderEvent[]> {
             .where(eq(patients.id, phaseInfo[0].patientId))
             .limit(1);
 
-          if (patient[0]) {
+          if (patient[0] && patient[0].userId) {
             events.push({
               id: task.id,
               type: 'task',

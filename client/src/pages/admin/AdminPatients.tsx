@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "wouter";
+import { trpc } from "@/lib/trpc";
+import { Skeleton } from "@/components/ui/skeleton";
 import { 
   UsersIcon, 
   SearchIcon,
@@ -13,28 +15,31 @@ import {
 } from "@/components/NotionIcons";
 import { Download, Filter } from "lucide-react";
 
-const patients = [
-  { id: 1, name: "Иванов Петр Сергеевич", email: "ivanov@email.com", phone: "+7 (999) 123-45-67", prosthesis: "Genium X3", status: "active", progress: 78, registeredAt: "2024-01-15" },
-  { id: 2, name: "Сидорова Анна Михайловна", email: "sidorova@email.com", phone: "+7 (999) 234-56-78", prosthesis: "C-Leg 4", status: "active", progress: 45, registeredAt: "2024-02-20" },
-  { id: 3, name: "Козлов Михаил Александрович", email: "kozlov@email.com", phone: "+7 (999) 345-67-89", prosthesis: "Rheo Knee", status: "pending", progress: 92, registeredAt: "2024-03-10" },
-  { id: 4, name: "Петрова Елена Владимировна", email: "petrova@email.com", phone: "+7 (999) 456-78-90", prosthesis: "Genium X3", status: "active", progress: 33, registeredAt: "2024-04-05" },
-  { id: 5, name: "Николаев Сергей Иванович", email: "nikolaev@email.com", phone: "+7 (999) 567-89-01", prosthesis: "C-Leg 4", status: "inactive", progress: 67, registeredAt: "2024-05-12" },
-  { id: 6, name: "Федорова Мария Петровна", email: "fedorova@email.com", phone: "+7 (999) 678-90-12", prosthesis: "Kenevo", status: "active", progress: 55, registeredAt: "2024-06-18" },
-  { id: 7, name: "Смирнов Алексей Дмитриевич", email: "smirnov@email.com", phone: "+7 (999) 789-01-23", prosthesis: "Genium X3", status: "active", progress: 88, registeredAt: "2024-07-22" },
-  { id: 8, name: "Кузнецова Ольга Николаевна", email: "kuznetsova@email.com", phone: "+7 (999) 890-12-34", prosthesis: "C-Leg 4", status: "pending", progress: 12, registeredAt: "2024-08-30" },
-];
-
 export default function AdminPatients() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  const filteredPatients = patients.filter(patient => {
-    const matchesSearch = patient.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         patient.email.toLowerCase().includes(searchQuery.toLowerCase());
+  // Fetch patients from API
+  const { data: patients, isLoading } = trpc.admin.getPatients.useQuery();
+
+  const filteredPatients = (patients || []).filter((patient: any) => {
+    const matchesSearch = searchQuery === "" || 
+      patient.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      patient.email?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || patient.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const getStatusCounts = () => {
+    const all = patients?.length || 0;
+    const active = patients?.filter((p: any) => p.status === 'active').length || 0;
+    const pending = patients?.filter((p: any) => p.status === 'pending').length || 0;
+    const inactive = patients?.filter((p: any) => p.status === 'inactive').length || 0;
+    return { all, active, pending, inactive };
+  };
+
+  const counts = getStatusCounts();
 
   return (
     <AdminLayout title={t("admin.patients.title")}>
@@ -83,7 +88,7 @@ export default function AdminPatients() {
             >
               {t(`admin.status.${status}`)}
               <span className="ml-2 text-xs opacity-70">
-                ({status === "all" ? patients.length : patients.filter(p => p.status === status).length})
+                ({counts[status as keyof typeof counts]})
               </span>
             </button>
           ))}
@@ -105,57 +110,97 @@ export default function AdminPatients() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredPatients.map((patient) => (
-                    <tr key={patient.id} className="border-b border-border hover:bg-muted/30 transition-colors">
-                      <td className="p-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                            <UsersIcon size={20} className="text-primary" />
+                  {isLoading ? (
+                    Array.from({ length: 5 }).map((_, i) => (
+                      <tr key={i} className="border-b border-border">
+                        <td className="p-4">
+                          <div className="flex items-center gap-3">
+                            <Skeleton className="w-10 h-10 rounded-full" />
+                            <Skeleton className="h-5 w-40" />
                           </div>
-                          <div>
-                            <p className="font-medium">{patient.name}</p>
-                            <p className="text-sm text-muted-foreground">ID: {patient.id}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <p className="text-sm">{patient.email}</p>
-                        <p className="text-sm text-muted-foreground">{patient.phone}</p>
-                      </td>
-                      <td className="p-4">
-                        <span className="px-2 py-1 rounded-md bg-secondary text-secondary-foreground text-sm">
-                          {patient.prosthesis}
-                        </span>
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center gap-2">
-                          <div className="w-24 h-2 rounded-full bg-muted overflow-hidden">
-                            <div 
-                              className="h-full bg-primary rounded-full transition-all"
-                              style={{ width: `${patient.progress}%` }}
-                            />
-                          </div>
-                          <span className="text-sm font-medium">{patient.progress}%</span>
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          patient.status === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 
-                          patient.status === 'pending' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' : 
-                          'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
-                        }`}>
-                          {t(`admin.status.${patient.status}`)}
-                        </span>
-                      </td>
-                      <td className="p-4">
-                        <Link href={`/admin/patients/${patient.id}`}>
-                          <Button variant="ghost" size="sm">
-                            <ChevronRightIcon size={18} />
-                          </Button>
-                        </Link>
+                        </td>
+                        <td className="p-4"><Skeleton className="h-5 w-32" /></td>
+                        <td className="p-4"><Skeleton className="h-5 w-24" /></td>
+                        <td className="p-4"><Skeleton className="h-5 w-16" /></td>
+                        <td className="p-4"><Skeleton className="h-6 w-20" /></td>
+                        <td className="p-4"><Skeleton className="h-8 w-8" /></td>
+                      </tr>
+                    ))
+                  ) : filteredPatients.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="p-8 text-center text-muted-foreground">
+                        <UsersIcon size={48} className="mx-auto mb-4 opacity-50" />
+                        <p>{language === 'ru' ? 'Пациенты не найдены' : 'No patients found'}</p>
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    filteredPatients.map((patient: any) => (
+                      <tr key={patient.id} className="border-b border-border hover:bg-muted/30 transition-colors">
+                        <td className="p-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                              <span className="text-sm font-semibold text-primary">
+                                {patient.name?.charAt(0) || 'P'}
+                              </span>
+                            </div>
+                            <div>
+                              <p className="font-medium">{patient.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {language === 'ru' ? 'Регистрация: ' : 'Registered: '}
+                                {patient.createdAt 
+                                  ? new Date(patient.createdAt).toLocaleDateString(language === 'ru' ? 'ru-RU' : 'en-US')
+                                  : '-'
+                                }
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <p className="text-sm">{patient.email || '-'}</p>
+                          <p className="text-xs text-muted-foreground">{patient.phone || '-'}</p>
+                        </td>
+                        <td className="p-4">
+                          <span className="px-2 py-1 bg-primary/10 text-primary rounded text-sm">
+                            {patient.prosthesisModel || '-'}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex items-center gap-2">
+                            <div className="w-20 h-2 bg-muted rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-primary transition-all"
+                                style={{ width: `${patient.progress || 0}%` }}
+                              />
+                            </div>
+                            <span className="text-sm font-medium">{patient.progress || 0}%</span>
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <span className={`px-2 py-1 rounded text-xs font-medium ${
+                            patient.status === 'active' 
+                              ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                              : patient.status === 'pending'
+                              ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                              : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
+                          }`}>
+                            {patient.status === 'active' 
+                              ? (language === 'ru' ? 'Активен' : 'Active')
+                              : patient.status === 'pending'
+                              ? (language === 'ru' ? 'Ожидание' : 'Pending')
+                              : (language === 'ru' ? 'Неактивен' : 'Inactive')
+                            }
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <Link href={`/admin/patients/${patient.id}`}>
+                            <Button variant="ghost" size="icon">
+                              <ChevronRightIcon size={18} />
+                            </Button>
+                          </Link>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -163,19 +208,24 @@ export default function AdminPatients() {
         </Card>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            {t("admin.patients.showing")} {filteredPatients.length} {t("admin.patients.of")} {patients.length}
-          </p>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" disabled>
-              {t("common.back")}
-            </Button>
-            <Button variant="outline" size="sm">
-              {t("common.next")}
-            </Button>
+        {!isLoading && filteredPatients.length > 0 && (
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              {language === 'ru' 
+                ? `Показано ${filteredPatients.length} из ${patients?.length || 0} пациентов`
+                : `Showing ${filteredPatients.length} of ${patients?.length || 0} patients`
+              }
+            </p>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" disabled>
+                {language === 'ru' ? 'Назад' : 'Previous'}
+              </Button>
+              <Button variant="outline" size="sm" disabled>
+                {language === 'ru' ? 'Далее' : 'Next'}
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </AdminLayout>
   );

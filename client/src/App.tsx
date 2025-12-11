@@ -16,6 +16,11 @@ import Settings from "./pages/Settings";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminPatients from "./pages/admin/AdminPatients";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
+import AdminContent from "./pages/admin/AdminContent";
+import AdminOrders from "./pages/admin/AdminOrders";
+import AdminCalendar from "./pages/admin/AdminCalendar";
+import AdminNotifications from "./pages/admin/AdminNotifications";
+import AdminRehabilitation from "./pages/admin/AdminRehabilitation";
 
 function Router() {
   return (
@@ -35,11 +40,12 @@ function Router() {
       <Route path={"/admin"} component={AdminDashboard} />
       <Route path={"/admin/patients"} component={AdminPatients} />
       <Route path={"/admin/patients/:id"} component={AdminPatients} />
+      <Route path={"/admin/rehabilitation"} component={AdminRehabilitation} />
+      <Route path={"/admin/content"} component={AdminContent} />
+      <Route path={"/admin/orders"} component={AdminOrders} />
+      <Route path={"/admin/calendar"} component={AdminCalendar} />
+      <Route path={"/admin/notifications"} component={AdminNotifications} />
       <Route path={"/admin/analytics"} component={AdminAnalytics} />
-      <Route path={"/admin/content"} component={AdminDashboard} />
-      <Route path={"/admin/orders"} component={AdminDashboard} />
-      <Route path={"/admin/calendar"} component={AdminDashboard} />
-      <Route path={"/admin/notifications"} component={AdminDashboard} />
       <Route path={"/admin/settings"} component={Settings} />
       
       <Route path={"/404"} component={NotFound} />
