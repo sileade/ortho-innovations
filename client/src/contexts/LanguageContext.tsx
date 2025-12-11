@@ -36,6 +36,8 @@ export const translations: Translations = {
   "dashboard.viewPlan": { ru: "Смотреть план", en: "View Plan" },
   "dashboard.articles": { ru: "Статьи", en: "Articles" },
   "dashboard.bookService": { ru: "Записаться", en: "Book Service" },
+  "dashboard.needService": { ru: "Требуется сервис", en: "Service Required" },
+  "dashboard.bookServiceDesc": { ru: "Запишитесь на обслуживание вашего протеза", en: "Schedule maintenance for your prosthesis" },
   
   // Rehabilitation
   "rehab.title": { ru: "План реабилитации", en: "Rehabilitation Plan" },
