@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { AlertTriangle, RotateCcw } from "lucide-react";
 import { Component, ReactNode, ErrorInfo } from "react";
-import { captureError } from "@/lib/sentry";
+import { errorLogger } from "@/lib/errorLogger";
 
 interface Props {
   children: ReactNode;
@@ -23,8 +23,8 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Send error to Sentry with component stack
-    captureError(error, {
+    // Log error locally with component stack
+    errorLogger.error(error.message, error, {
       componentStack: errorInfo.componentStack,
       errorBoundary: true,
     });

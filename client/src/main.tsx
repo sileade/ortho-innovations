@@ -6,12 +6,12 @@ import { createRoot } from "react-dom/client";
 import superjson from "superjson";
 import App from "./App";
 import { getLoginUrl } from "./const";
-import { initSentry, captureError } from "./lib/sentry";
+import { errorLogger, setupGlobalErrorHandlers } from "./lib/errorLogger";
 import { registerServiceWorker, setupNetworkListeners } from "./lib/serviceWorker";
 import "./index.css";
 
-// Initialize Sentry for error monitoring
-initSentry();
+// Initialize local error logger with 2-day auto-cleanup
+setupGlobalErrorHandlers();
 
 // Register service worker for offline support (production only)
 registerServiceWorker({
@@ -46,9 +46,9 @@ queryClient.getQueryCache().subscribe(event => {
   if (event.type === "updated" && event.action.type === "error") {
     const error = event.query.state.error;
     redirectToLoginIfUnauthorized(error);
-    // Send error to Sentry
+    // Log error locally
     if (error instanceof Error) {
-      captureError(error, { type: 'query', queryKey: event.query.queryKey });
+      errorLogger.error(error.message, error, { type: 'query', queryKey: event.query.queryKey });
     }
     console.error("[API Query Error]", error);
   }
@@ -58,9 +58,9 @@ queryClient.getMutationCache().subscribe(event => {
   if (event.type === "updated" && event.action.type === "error") {
     const error = event.mutation.state.error;
     redirectToLoginIfUnauthorized(error);
-    // Send error to Sentry
+    // Log error locally
     if (error instanceof Error) {
-      captureError(error, { type: 'mutation' });
+      errorLogger.error(error.message, error, { type: 'mutation' });
     }
     console.error("[API Mutation Error]", error);
   }

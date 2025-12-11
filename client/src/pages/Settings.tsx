@@ -5,11 +5,21 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { CalendarSync } from "@/components/CalendarSync";
 import { NotificationPreferences } from "@/components/NotificationPreferences";
-import { Bell, Moon, Globe, Lock, HelpCircle, FileText, LogOut, ChevronRight, Mail, Smartphone, Dumbbell, Megaphone, Shield, Key, Calendar } from "lucide-react";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { Bell, Moon, Globe, Lock, HelpCircle, FileText, LogOut, ChevronRight, Mail, Smartphone, Dumbbell, Megaphone, Shield, Key, Calendar, Loader2 } from "lucide-react";
 
 export default function Settings() {
   const { t, language, setLanguage } = useLanguage();
   const { theme, setTheme } = useTheme();
+  const { isSupported, isEnabled, isLoading, enableNotifications, disableNotifications } = usePushNotifications();
+
+  const handlePushToggle = async (checked: boolean) => {
+    if (checked) {
+      await enableNotifications();
+    } else {
+      disableNotifications();
+    }
+  };
 
   return (
     <AppLayout>
@@ -47,10 +57,22 @@ export default function Settings() {
                   <Smartphone className="w-5 h-5 text-muted-foreground" />
                   <div>
                     <p className="font-medium text-sm">{t("settings.pushNotif")}</p>
-                    <p className="text-xs text-muted-foreground">{t("settings.pushNotifDesc")}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {isSupported 
+                        ? t("settings.pushNotifDesc")
+                        : (language === 'ru' ? 'Не поддерживается в этом браузере' : 'Not supported in this browser')}
+                    </p>
                   </div>
                 </div>
-                <Switch defaultChecked />
+                {isLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                ) : (
+                  <Switch 
+                    checked={isEnabled} 
+                    onCheckedChange={handlePushToggle}
+                    disabled={!isSupported || isLoading}
+                  />
+                )}
               </div>
               <NotificationPreferences>
                 <div className="flex items-center justify-between cursor-pointer hover:bg-muted/50 -mx-2 px-2 py-2 rounded-lg transition-colors">
