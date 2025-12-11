@@ -38,6 +38,7 @@ const AdminCalendar = lazy(() => import("./pages/admin/AdminCalendar"));
 const AdminNotifications = lazy(() => import("./pages/admin/AdminNotifications"));
 const AdminRehabilitation = lazy(() => import("./pages/admin/AdminRehabilitation"));
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
+const AdminPatientDetails = lazy(() => import("./pages/admin/AdminPatientDetails"));
 
 function Router() {
   return (
@@ -57,7 +58,7 @@ function Router() {
         {/* Admin Panel Routes */}
         <Route path={"/admin"} component={AdminDashboard} />
         <Route path={"/admin/patients"} component={AdminPatients} />
-        <Route path={"/admin/patients/:id"} component={AdminPatients} />
+        <Route path={"/admin/patients/:id"} component={AdminPatientDetails} />
         <Route path={"/admin/rehabilitation"} component={AdminRehabilitation} />
         <Route path={"/admin/content"} component={AdminContent} />
         <Route path={"/admin/orders"} component={AdminOrders} />

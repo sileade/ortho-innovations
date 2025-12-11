@@ -387,3 +387,9 @@
 - [x] Add turquoise/teal borders to cards in light theme (HSL 174 72% 56%)
 - [x] Test changes (patient app and admin panel both show borders)
 - [x] Commit to GitHub (d4971fa)
+
+## Patient Details Page - Dec 11, 2024 (Session 15)
+- [x] Create AdminPatientDetails page with full patient info
+- [x] Add patient history section (appointments, orders, rehab progress)
+- [x] Add route and verify navigation from patient list
+- [x] Test and commit to GitHub (37 tests pass, page works)
