@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
@@ -17,6 +17,7 @@ import { Download, Filter } from "lucide-react";
 
 export default function AdminPatients() {
   const { t, language } = useLanguage();
+  const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
@@ -135,7 +136,11 @@ export default function AdminPatients() {
                     </tr>
                   ) : (
                     filteredPatients.map((patient: any) => (
-                      <tr key={patient.id} className="border-b border-border hover:bg-muted/30 transition-colors">
+                      <tr 
+                                        key={patient.id} 
+                                        className="border-b border-border hover:bg-muted/30 transition-colors cursor-pointer"
+                                        onClick={() => setLocation(`/admin/patients/${patient.id}`)}
+                                      >
                         <td className="p-4">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">

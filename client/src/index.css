@@ -281,3 +281,105 @@
   opacity: 0.9;
   transform: translateY(-1px);
 }
+
+/* Enhanced card visibility for light theme */
+@layer components {
+  /* Cards with subtle shadow and border in light mode */
+  .card-elevated {
+    @apply bg-card border border-border/50 shadow-sm;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
+  }
+  
+  .card-elevated:hover {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  }
+  
+  /* Stats cards with better visibility */
+  .stats-card {
+    @apply bg-card border border-border/60 rounded-xl p-4;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04);
+  }
+  
+  /* Action buttons with better contrast */
+  .btn-visible {
+    @apply border border-border/70 shadow-sm;
+  }
+  
+  /* Table rows with better separation */
+  .table-row-visible {
+    @apply border-b border-border/60;
+  }
+  
+  .table-row-visible:hover {
+    @apply bg-muted/40;
+  }
+  
+  /* Input fields with better visibility */
+  .input-visible {
+    @apply border border-border/80 shadow-sm;
+  }
+  
+  /* Modal/dialog with enhanced shadow */
+  .modal-elevated {
+    box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.08);
+  }
+  
+  /* Sidebar items with better hover state */
+  .sidebar-item-visible {
+    @apply rounded-lg transition-all duration-200;
+  }
+  
+  .sidebar-item-visible:hover {
+    @apply bg-sidebar-accent/20;
+  }
+  
+  /* Quick action cards */
+  .quick-action-card {
+    @apply bg-card border border-border/50 rounded-xl p-4 transition-all duration-200;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+  }
+  
+  .quick-action-card:hover {
+    @apply border-primary/30;
+    box-shadow: 0 4px 8px -2px rgb(0 0 0 / 0.06);
+    transform: translateY(-1px);
+  }
+  
+  /* Progress bars with better visibility */
+  .progress-visible {
+    @apply bg-muted/80 rounded-full overflow-hidden;
+  }
+  
+  /* Badge/tag with better contrast */
+  .badge-visible {
+    @apply border border-current/20;
+  }
+}
+
+/* Light theme specific enhancements */
+:root {
+  /* Slightly darker border for better visibility */
+  --border-enhanced: 220 13% 85%;
+}
+
+/* Apply enhanced borders to shadcn Card component */
+[data-slot="card"] {
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+}
+
+/* Better button visibility in light mode */
+button[data-variant="outline"] {
+  border-color: hsl(var(--border));
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+}
+
+/* Table header with subtle background */
+thead tr {
+  background: hsl(var(--muted) / 0.5);
+}
+
+/* Form inputs with better focus states */
+input:focus, select:focus, textarea:focus {
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.15);
+}

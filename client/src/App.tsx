@@ -37,6 +37,7 @@ const AdminOrders = lazy(() => import("./pages/admin/AdminOrders"));
 const AdminCalendar = lazy(() => import("./pages/admin/AdminCalendar"));
 const AdminNotifications = lazy(() => import("./pages/admin/AdminNotifications"));
 const AdminRehabilitation = lazy(() => import("./pages/admin/AdminRehabilitation"));
+const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
 
 function Router() {
   return (
@@ -63,7 +64,7 @@ function Router() {
         <Route path={"/admin/calendar"} component={AdminCalendar} />
         <Route path={"/admin/notifications"} component={AdminNotifications} />
         <Route path={"/admin/analytics"} component={AdminAnalytics} />
-        <Route path={"/admin/settings"} component={Settings} />
+        <Route path={"/admin/settings"} component={AdminSettings} />
         
         <Route path={"/404"} component={NotFound} />
         <Route component={NotFound} />
