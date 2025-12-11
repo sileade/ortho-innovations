@@ -77,6 +77,7 @@ export default function Service() {
   const [selectedSpecialist, setSelectedSpecialist] = useState<typeof specialists[0] | null>(null);
   const [bookingStep, setBookingStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
 
   // Fetch service requests from API
   const { data: serviceRequests, isLoading: requestsLoading, refetch: refetchRequests } = trpc.service.getRequests.useQuery();
