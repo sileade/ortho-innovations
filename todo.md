@@ -209,5 +209,11 @@
 - [x] Code analysis iteration 6 - Frontend components check (no lint errors, no console.log)
 - [x] Code analysis iteration 7 - Security & best practices check (no hardcoded secrets, 32 tests pass)
 - [x] Deployment testing round 1-7 (all pages load, no console errors)
-- [ ] GitHub commit
-- [ ] Update README with screenshots
+- [x] GitHub commit (pushed to sileade/ortho-patient-app)
+- [x] Update README with new screenshots (7 screenshots total)
+
+## Service Request Card Description - Dec 11, 2024
+- [x] Add service type name to request cards
+- [x] Add date to request cards
+- [x] Add specialist name to request cards (if assigned)
+- [x] Add description text to request cards
