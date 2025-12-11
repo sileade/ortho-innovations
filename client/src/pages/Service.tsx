@@ -641,6 +641,134 @@ END:VCALENDAR`;
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Service Request Detail Modal */}
+      <Dialog open={!!selectedRequest} onOpenChange={(open) => !open && setSelectedRequest(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {selectedRequest && (
+                <>
+                  {selectedRequest.type === 'adjustment' && <Settings className="w-6 h-6 text-primary" />}
+                  {selectedRequest.type === 'checkup' && <Shield className="w-6 h-6 text-green-500" />}
+                  {selectedRequest.type === 'repair' && <Wrench className="w-6 h-6 text-orange-500" />}
+                  {selectedRequest.type === 'consultation' && <Zap className="w-6 h-6 text-red-500" />}
+                  {language === 'ru' 
+                    ? (selectedRequest.type === 'adjustment' ? 'Настройка' 
+                      : selectedRequest.type === 'checkup' ? 'Осмотр' 
+                      : selectedRequest.type === 'repair' ? 'Ремонт' 
+                      : 'Экстренный')
+                    : (selectedRequest.type === 'adjustment' ? 'Adjustment' 
+                      : selectedRequest.type === 'checkup' ? 'Checkup' 
+                      : selectedRequest.type === 'repair' ? 'Repair' 
+                      : 'Emergency')}
+                </>
+              )}
+            </DialogTitle>
+            <DialogDescription>
+              {language === 'ru' ? 'Детали заявки на сервис' : 'Service request details'}
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedRequest && (
+            <div className="space-y-4">
+              {/* Status */}
+              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                <span className="text-sm text-muted-foreground">
+                  {language === 'ru' ? 'Статус' : 'Status'}
+                </span>
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  selectedRequest.status === 'pending' ? 'bg-yellow-500/20 text-yellow-500' :
+                  selectedRequest.status === 'scheduled' ? 'bg-green-500/20 text-green-500' :
+                  selectedRequest.status === 'in_progress' ? 'bg-blue-500/20 text-blue-500' :
+                  selectedRequest.status === 'completed' ? 'bg-gray-500/20 text-gray-500' :
+                  'bg-red-500/20 text-red-500'
+                }`}>
+                  {selectedRequest.status === 'pending' ? (language === 'ru' ? 'Ожидает' : 'Pending') :
+                   selectedRequest.status === 'scheduled' ? (language === 'ru' ? 'Запланировано' : 'Scheduled') :
+                   selectedRequest.status === 'in_progress' ? (language === 'ru' ? 'В работе' : 'In Progress') :
+                   selectedRequest.status === 'completed' ? (language === 'ru' ? 'Завершено' : 'Completed') :
+                   (language === 'ru' ? 'Отменено' : 'Cancelled')}
+                </span>
+              </div>
+
+              {/* Date */}
+              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                <span className="text-sm text-muted-foreground flex items-center gap-2">
+                  <CalendarIcon className="w-4 h-4" />
+                  {language === 'ru' ? 'Дата' : 'Date'}
+                </span>
+                <span className="font-medium">
+                  {selectedRequest.scheduledDate 
+                    ? new Date(selectedRequest.scheduledDate).toLocaleDateString(language === 'ru' ? 'ru-RU' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' })
+                    : (language === 'ru' ? 'Не назначена' : 'Not scheduled')}
+                </span>
+              </div>
+
+              {/* Time */}
+              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                <span className="text-sm text-muted-foreground flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  {language === 'ru' ? 'Время' : 'Time'}
+                </span>
+                <span className="font-medium">
+                  {selectedRequest.scheduledTime || (language === 'ru' ? 'Не назначено' : 'Not scheduled')}
+                </span>
+              </div>
+
+              {/* Specialist */}
+              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                <span className="text-sm text-muted-foreground flex items-center gap-2">
+                  <Star className="w-4 h-4" />
+                  {language === 'ru' ? 'Специалист' : 'Specialist'}
+                </span>
+                <span className="font-medium">
+                  {selectedRequest.specialist || (language === 'ru' ? 'Будет назначен' : 'To be assigned')}
+                </span>
+              </div>
+
+              {/* Description */}
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <span className="text-sm text-muted-foreground block mb-2">
+                  {language === 'ru' ? 'Описание' : 'Description'}
+                </span>
+                <p className="text-sm">
+                  {selectedRequest.description || (language === 'ru' ? 'Нет описания' : 'No description')}
+                </p>
+              </div>
+
+              {/* Doctor's Note */}
+              {selectedRequest.notes && (
+                <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
+                  <span className="text-sm text-primary font-medium block mb-2">
+                    {language === 'ru' ? 'Комментарий врача' : "Doctor's Note"}
+                  </span>
+                  <p className="text-sm">{selectedRequest.notes}</p>
+                </div>
+              )}
+
+              {/* Request ID */}
+              <div className="text-center text-xs text-muted-foreground">
+                {language === 'ru' ? 'Номер заявки' : 'Request ID'}: ORD-{String(selectedRequest.id).padStart(5, '0')}
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="flex gap-2">
+            {selectedRequest?.status === 'pending' && (
+              <Button variant="destructive" onClick={() => {
+                // TODO: Implement cancel request
+                setSelectedRequest(null);
+              }}>
+                {language === 'ru' ? 'Отменить заявку' : 'Cancel Request'}
+              </Button>
+            )}
+            <Button variant="outline" onClick={() => setSelectedRequest(null)}>
+              {language === 'ru' ? 'Закрыть' : 'Close'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }

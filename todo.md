@@ -217,3 +217,8 @@
 - [x] Add date to request cards
 - [x] Add specialist name to request cards (if assigned)
 - [x] Add description text to request cards
+
+
+## Service Request Card Modal Fix - Dec 11, 2024
+- [x] Fix card click to open detail modal with full information
+- [x] Show status, date, time, specialist, description in modal
