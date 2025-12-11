@@ -37,8 +37,9 @@ const initialOrders: Order[] = [
 
 export default function AdminOrders() {
   const { language } = useLanguage();
-  // Fetch orders from API
-  const { data: apiOrders, isLoading, refetch } = trpc.admin.getOrders.useQuery();
+  // Fetch orders from API with caching
+  const queryOptions = { staleTime: 30000, refetchOnWindowFocus: false, retry: 1 };
+  const { data: apiOrders, isLoading, refetch } = trpc.admin.getOrders.useQuery(undefined, queryOptions);
   const updateOrderMutation = trpc.admin.updateOrderStatus.useMutation({
     onSuccess: () => {
       refetch();

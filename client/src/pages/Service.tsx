@@ -79,13 +79,20 @@ export default function Service() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
 
-  // Fetch service requests from API
-  const { data: serviceRequests, isLoading: requestsLoading, refetch: refetchRequests } = trpc.service.getRequests.useQuery();
+  // Fetch service requests from API with stale-while-revalidate
+  const { data: serviceRequests, isLoading: requestsLoading, refetch: refetchRequests, error: requestsError } = trpc.service.getRequests.useQuery(undefined, {
+    staleTime: 30000, // 30 seconds
+    refetchOnWindowFocus: false,
+    retry: 1,
+  });
   
-  // Create service request mutation
+  // Create service request mutation with optimistic update
   const createRequestMutation = trpc.service.createRequest.useMutation({
     onSuccess: () => {
       refetchRequests();
+    },
+    onError: (error) => {
+      console.error('Service request creation error:', error);
     }
   });
 

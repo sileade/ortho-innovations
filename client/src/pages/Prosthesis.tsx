@@ -23,10 +23,11 @@ export default function Prosthesis() {
   const { t, language } = useLanguage();
   const [showQR, setShowQR] = useState(false);
 
-  // Fetch prosthesis data from API
-  const { data: prosthesis, isLoading: prosthesisLoading } = trpc.prosthesis.get.useQuery();
-  const { data: documents, isLoading: documentsLoading } = trpc.prosthesis.getDocuments.useQuery();
-  const { data: serviceRequests } = trpc.service.getRequests.useQuery();
+  // Fetch prosthesis data from API with caching
+  const queryOptions = { staleTime: 60000, refetchOnWindowFocus: false, retry: 1 };
+  const { data: prosthesis, isLoading: prosthesisLoading } = trpc.prosthesis.get.useQuery(undefined, queryOptions);
+  const { data: documents, isLoading: documentsLoading } = trpc.prosthesis.getDocuments.useQuery(undefined, queryOptions);
+  const { data: serviceRequests } = trpc.service.getRequests.useQuery(undefined, queryOptions);
 
   // Get upcoming maintenance from service requests
   const upcomingMaintenance = serviceRequests?.filter(

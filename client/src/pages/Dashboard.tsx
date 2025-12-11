@@ -23,11 +23,12 @@ import {
 export default function Dashboard() {
   const { t, language } = useLanguage();
   
-  // Fetch data from API
-  const { data: dashboardData, isLoading: dashboardLoading } = trpc.dashboard.getSummary.useQuery();
-  const { data: todaysTasks, isLoading: tasksLoading } = trpc.rehabilitation.getTodaysTasks.useQuery();
-  const { data: profile } = trpc.patient.getProfile.useQuery();
-  const { data: prosthesis } = trpc.prosthesis.get.useQuery();
+  // Fetch data from API with caching for faster subsequent loads
+  const queryOptions = { staleTime: 30000, refetchOnWindowFocus: false, retry: 1 };
+  const { data: dashboardData, isLoading: dashboardLoading } = trpc.dashboard.getSummary.useQuery(undefined, queryOptions);
+  const { data: todaysTasks, isLoading: tasksLoading } = trpc.rehabilitation.getTodaysTasks.useQuery(undefined, queryOptions);
+  const { data: profile } = trpc.patient.getProfile.useQuery(undefined, queryOptions);
+  const { data: prosthesis } = trpc.prosthesis.get.useQuery(undefined, queryOptions);
   
   const dayNumber = dashboardData?.dayOfRecovery || 1;
   const completedTasks = todaysTasks?.filter(task => task.completed).length || 0;

@@ -23,15 +23,16 @@ export default function Rehabilitation() {
   const { t, language } = useLanguage();
   const utils = trpc.useUtils();
   
-  // Fetch data from API
-  const { data: plan, isLoading: planLoading } = trpc.rehabilitation.getPlan.useQuery();
+  // Fetch data from API with caching
+  const queryOptions = { staleTime: 30000, refetchOnWindowFocus: false, retry: 1 };
+  const { data: plan, isLoading: planLoading } = trpc.rehabilitation.getPlan.useQuery(undefined, queryOptions);
   const { data: phases, isLoading: phasesLoading } = trpc.rehabilitation.getPhases.useQuery(
     { planId: plan?.id || 0 },
-    { enabled: !!plan?.id }
+    { enabled: !!plan?.id, ...queryOptions }
   );
-  const { data: todaysTasks, isLoading: tasksLoading } = trpc.rehabilitation.getTodaysTasks.useQuery();
-  const { data: appointments, isLoading: appointmentsLoading } = trpc.appointments.getAll.useQuery();
-  const { data: achievements } = trpc.achievements.getAll.useQuery();
+  const { data: todaysTasks, isLoading: tasksLoading } = trpc.rehabilitation.getTodaysTasks.useQuery(undefined, queryOptions);
+  const { data: appointments, isLoading: appointmentsLoading } = trpc.appointments.getAll.useQuery(undefined, queryOptions);
+  const { data: achievements } = trpc.achievements.getAll.useQuery(undefined, queryOptions);
   
   // Complete task mutation
   const completeTaskMutation = trpc.rehabilitation.completeTask.useMutation({

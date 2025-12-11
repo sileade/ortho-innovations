@@ -17,11 +17,12 @@ import {
 export default function AdminDashboard() {
   const { t, language } = useLanguage();
 
-  // Fetch admin dashboard data from API
-  const { data: dashboardStats, isLoading: statsLoading } = trpc.admin.getDashboardStats.useQuery();
-  const { data: recentPatients, isLoading: patientsLoading } = trpc.admin.getPatients.useQuery();
+  // Fetch admin dashboard data from API with caching
+  const queryOptions = { staleTime: 30000, refetchOnWindowFocus: false, retry: 1 };
+  const { data: dashboardStats, isLoading: statsLoading } = trpc.admin.getDashboardStats.useQuery(undefined, queryOptions);
+  const { data: recentPatients, isLoading: patientsLoading } = trpc.admin.getPatients.useQuery(undefined, queryOptions);
   // Pending tasks - using orders as proxy
-  const { data: pendingOrders, isLoading: tasksLoading } = trpc.admin.getOrders.useQuery();
+  const { data: pendingOrders, isLoading: tasksLoading } = trpc.admin.getOrders.useQuery(undefined, queryOptions);
   const pendingTasks = (pendingOrders || []).slice(0, 5).map((o: any) => ({
     id: o.id,
     type: 'order',

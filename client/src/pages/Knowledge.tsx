@@ -21,16 +21,17 @@ export default function Knowledge() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [selectedArticleId, setSelectedArticleId] = useState<number | null>(null);
 
-  // Fetch articles from API
+  // Fetch articles from API with caching
+  const queryOptions = { staleTime: 60000, refetchOnWindowFocus: false, retry: 1 };
   const { data: articles, isLoading } = trpc.knowledge.getArticles.useQuery({
     category: activeCategory === "all" ? undefined : activeCategory,
     search: searchQuery || undefined,
-  });
+  }, queryOptions);
 
   // Fetch single article when selected
   const { data: articleDetail, isLoading: articleLoading } = trpc.knowledge.getArticle.useQuery(
     { id: selectedArticleId! },
-    { enabled: !!selectedArticleId }
+    { enabled: !!selectedArticleId, ...queryOptions }
   );
 
   // Increment views mutation
