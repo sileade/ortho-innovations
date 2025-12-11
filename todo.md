@@ -309,3 +309,9 @@
 - [x] Add Firebase environment variables (apiKey, projectId, appId, etc.)
 - [x] Test push notifications (37 tests pass)
 - [x] Commit to GitHub (14405e1)
+
+## Deployment Automation - Dec 11, 2024 (Session 7)
+- [x] Create automated deployment script (deploy.sh)
+- [x] Add Firebase variables to docker-compose.dev.yml (with defaults)
+- [x] Update docker-compose with env vars
+- [x] Commit to GitHub (a94e3eb)

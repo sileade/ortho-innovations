@@ -9,9 +9,17 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=postgresql://ortho:${DB_PASSWORD}@db:5432/ortho_patient
-      - JWT_SECRET=${JWT_SECRET}
+      - DATABASE_URL=postgresql://ortho:${DB_PASSWORD:-ortho123}@db:5432/ortho_patient
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key}
       - VITE_APP_TITLE=${VITE_APP_TITLE:-Ortho Innovations}
+      # Firebase Configuration (Push Notifications)
+      - VITE_FIREBASE_API_KEY=${VITE_FIREBASE_API_KEY:-AIzaSyB_kgiOiqLwZkWq-ENi64GYyJSwAKK7dBQ}
+      - VITE_FIREBASE_AUTH_DOMAIN=${VITE_FIREBASE_AUTH_DOMAIN:-ortho-innovations.firebaseapp.com}
+      - VITE_FIREBASE_PROJECT_ID=${VITE_FIREBASE_PROJECT_ID:-ortho-innovations}
+      - VITE_FIREBASE_STORAGE_BUCKET=${VITE_FIREBASE_STORAGE_BUCKET:-ortho-innovations.firebasestorage.app}
+      - VITE_FIREBASE_MESSAGING_SENDER_ID=${VITE_FIREBASE_MESSAGING_SENDER_ID:-914686839626}
+      - VITE_FIREBASE_APP_ID=${VITE_FIREBASE_APP_ID:-1:914686839626:web:167c8a6ca7af14d85e4fb3}
+      - VITE_FIREBASE_VAPID_KEY=${VITE_FIREBASE_VAPID_KEY:-BLvxBh3zA6oKMU-UGpFKgWumw5JfvFQL9Of26hwfarqJTfd_4WSxudNM8-0zikjVer7R3wFk5ELVlMrDyebQ6wQ}
     depends_on:
       db:
         condition: service_healthy
@@ -30,7 +38,7 @@ services:
     restart: unless-stopped
     environment:
       - POSTGRES_USER=ortho
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-ortho123}
       - POSTGRES_DB=ortho_patient
     volumes:
       - postgres_data:/var/lib/postgresql/data
