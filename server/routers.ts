@@ -261,6 +261,20 @@ export const appRouter = router({
         return db.getPatientById(input.id);
       }),
 
+    // Update patient profile (admin)
+    updatePatient: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string().optional(),
+        phone: z.string().optional(),
+        email: z.string().optional(),
+        dateOfBirth: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        return db.updatePatientById(id, data);
+      }),
+
     // Get all rehabilitation plans
     getRehabPlans: protectedProcedure
       .input(z.object({

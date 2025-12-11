@@ -1,5 +1,5 @@
 import { useParams, useLocation } from "wouter";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { AdminLayout } from "@/components/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -7,6 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   ArrowLeft, 
   User, 
@@ -25,7 +29,9 @@ import {
   Bell,
   QrCode,
   MapPin,
-  Plus
+  Plus,
+  Download,
+  Loader2
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -64,6 +70,48 @@ export default function AdminPatientDetails() {
 
   const isLoading = patientLoading || ordersLoading || plansLoading;
 
+  // Modal states
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [appointmentModalOpen, setAppointmentModalOpen] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    dateOfBirth: ''
+  });
+  const [appointmentForm, setAppointmentForm] = useState({
+    title: 'Приём',
+    date: '',
+    time: '10:00',
+    duration: '60',
+    description: ''
+  });
+
+  // Mutations
+  const utils = trpc.useUtils();
+  const updatePatientMutation = trpc.admin.updatePatient.useMutation({
+    onSuccess: () => {
+      toast.success('Данные пациента обновлены');
+      utils.admin.getPatient.invalidate({ id: patientId });
+      utils.admin.getPatients.invalidate();
+      setEditModalOpen(false);
+    },
+    onError: (error) => {
+      toast.error('Ошибка при обновлении: ' + error.message);
+    }
+  });
+
+  const createAppointmentMutation = trpc.admin.createAppointment.useMutation({
+    onSuccess: () => {
+      toast.success('Запись на приём создана');
+      utils.admin.getPatient.invalidate({ id: patientId });
+      setAppointmentModalOpen(false);
+    },
+    onError: (error) => {
+      toast.error('Ошибка при создании записи: ' + error.message);
+    }
+  });
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "pending":
@@ -96,15 +144,116 @@ export default function AdminPatientDetails() {
   };
 
   const handleCreateAppointment = () => {
-    toast.info('Функция в разработке');
+    // Reset form and open modal
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    setAppointmentForm({
+      title: 'Приём',
+      date: tomorrow.toISOString().split('T')[0],
+      time: '10:00',
+      duration: '60',
+      description: ''
+    });
+    setAppointmentModalOpen(true);
   };
 
   const handleEdit = () => {
-    toast.info('Функция в разработке');
+    if (!patient) return;
+    // Populate form with current patient data
+    setEditForm({
+      name: patient.name || '',
+      phone: patient.phone || '',
+      email: patient.email || '',
+      dateOfBirth: patient.dateOfBirth ? new Date(patient.dateOfBirth).toISOString().split('T')[0] : ''
+    });
+    setEditModalOpen(true);
+  };
+
+  const handleSaveEdit = () => {
+    updatePatientMutation.mutate({
+      id: patientId,
+      name: editForm.name || undefined,
+      phone: editForm.phone || undefined,
+      email: editForm.email || undefined,
+      dateOfBirth: editForm.dateOfBirth || undefined
+    });
+  };
+
+  const handleSaveAppointment = () => {
+    if (!appointmentForm.date || !appointmentForm.time) {
+      toast.error('Укажите дату и время');
+      return;
+    }
+    const scheduledAt = new Date(`${appointmentForm.date}T${appointmentForm.time}:00`);
+    createAppointmentMutation.mutate({
+      patientId,
+      title: appointmentForm.title,
+      description: appointmentForm.description || undefined,
+      scheduledAt: scheduledAt.toISOString(),
+      duration: parseInt(appointmentForm.duration)
+    });
   };
 
   const handleDownloadQR = () => {
     toast.info('Функция в разработке');
+  };
+
+  const handleExportPDF = () => {
+    // Generate PDF with patient history
+    const patientData = {
+      name: patient?.name || 'Не указано',
+      phone: patient?.phone || 'Не указан',
+      email: patient?.email || 'Не указан',
+      status: patient?.status || 'active',
+      createdAt: formatDate(patient?.createdAt || null),
+      orders: patientOrders.length,
+      plans: patientPlans.length,
+      appointments: patientAppointments.length
+    };
+
+    // Create text content for PDF
+    let content = `КАРТА ПАЦИЕНТА\n`;
+    content += `================\n\n`;
+    content += `Имя: ${patientData.name}\n`;
+    content += `Телефон: ${patientData.phone}\n`;
+    content += `Email: ${patientData.email}\n`;
+    content += `Статус: ${patientData.status === 'active' ? 'Активен' : 'Неактивен'}\n`;
+    content += `Дата регистрации: ${patientData.createdAt}\n\n`;
+    
+    content += `СТАТИСТИКА\n`;
+    content += `--------\n`;
+    content += `Заказов: ${patientData.orders}\n`;
+    content += `Планов реабилитации: ${patientData.plans}\n`;
+    content += `Приёмов: ${patientData.appointments}\n\n`;
+
+    if (patientOrders.length > 0) {
+      content += `ИСТОРИЯ ЗАКАЗОВ\n`;
+      content += `--------------\n`;
+      patientOrders.forEach((order: any, i: number) => {
+        content += `${i + 1}. ${order.serviceType} - ${order.status} (${formatDate(order.createdAt)})\n`;
+      });
+      content += `\n`;
+    }
+
+    if (patientAppointments.length > 0) {
+      content += `ИСТОРИЯ ПРИЁМОВ\n`;
+      content += `--------------\n`;
+      patientAppointments.forEach((apt: any, i: number) => {
+        content += `${i + 1}. ${apt.title || 'Приём'} - ${formatDate(apt.scheduledAt)}\n`;
+      });
+    }
+
+    // Download as text file (for now, can be enhanced to PDF later)
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `patient_${patientId}_history.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success('История пациента скачана');
   };
 
   if (isLoading) {
@@ -175,6 +324,10 @@ export default function AdminPatientDetails() {
           </Button>
           
           <div className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" onClick={handleExportPDF}>
+              <Download className="w-4 h-4 mr-2" />
+              Экспорт
+            </Button>
             <Button variant="outline" size="sm" onClick={handleDownloadQR}>
               <QrCode className="w-4 h-4 mr-2" />
               QR-код
@@ -389,9 +542,9 @@ export default function AdminPatientDetails() {
                           <FileText className="h-5 w-5 text-primary" />
                         </div>
                         <div>
-                          <p className="font-medium">{order.serviceType}</p>
+                          <p className="font-medium">{typeof order.service === 'object' ? order.service.ru : order.service}</p>
                           <p className="text-sm text-muted-foreground">
-                            {order.orderNumber} • {formatDate(order.createdAt)}
+                            {order.orderNumber} • {order.date}
                           </p>
                         </div>
                       </div>
@@ -492,7 +645,7 @@ export default function AdminPatientDetails() {
                             <Calendar className={`h-5 w-5 ${isPast ? "text-gray-600" : "text-green-600"}`} />
                           </div>
                           <div>
-                            <p className="font-medium">{appointment.type || "Приём"}</p>
+                            <p className="font-medium">{appointment.title || "Приём"}</p>
                             <p className="text-sm text-muted-foreground">
                               {appointment.scheduledAt 
                                 ? new Date(appointment.scheduledAt).toLocaleString("ru-RU", {
@@ -534,6 +687,153 @@ export default function AdminPatientDetails() {
         </TabsContent>
       </Tabs>
       </div>
+
+      {/* Edit Patient Modal */}
+      <Dialog open={editModalOpen} onOpenChange={setEditModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Редактирование пациента</DialogTitle>
+            <DialogDescription>
+              Измените контактную информацию пациента
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="name">Имя</Label>
+              <Input
+                id="name"
+                value={editForm.name}
+                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                placeholder="Иван Иванов"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="phone">Телефон</Label>
+              <Input
+                id="phone"
+                value={editForm.phone}
+                onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                placeholder="+7 (999) 123-45-67"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={editForm.email}
+                onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                placeholder="patient@example.com"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="dateOfBirth">Дата рождения</Label>
+              <Input
+                id="dateOfBirth"
+                type="date"
+                value={editForm.dateOfBirth}
+                onChange={(e) => setEditForm({ ...editForm, dateOfBirth: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditModalOpen(false)}>
+              Отмена
+            </Button>
+            <Button onClick={handleSaveEdit} disabled={updatePatientMutation.isPending}>
+              {updatePatientMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Сохранить
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Appointment Modal */}
+      <Dialog open={appointmentModalOpen} onOpenChange={setAppointmentModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Запись на приём</DialogTitle>
+            <DialogDescription>
+              Создайте запись на приём для пациента
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="apt-title">Тип приёма</Label>
+              <Select
+                value={appointmentForm.title}
+                onValueChange={(value) => setAppointmentForm({ ...appointmentForm, title: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Выберите тип" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Приём">Приём</SelectItem>
+                  <SelectItem value="Консультация">Консультация</SelectItem>
+                  <SelectItem value="Осмотр">Осмотр</SelectItem>
+                  <SelectItem value="Настройка протеза">Настройка протеза</SelectItem>
+                  <SelectItem value="Реабилитация">Реабилитация</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="apt-date">Дата</Label>
+                <Input
+                  id="apt-date"
+                  type="date"
+                  value={appointmentForm.date}
+                  onChange={(e) => setAppointmentForm({ ...appointmentForm, date: e.target.value })}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="apt-time">Время</Label>
+                <Input
+                  id="apt-time"
+                  type="time"
+                  value={appointmentForm.time}
+                  onChange={(e) => setAppointmentForm({ ...appointmentForm, time: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="apt-duration">Продолжительность (мин)</Label>
+              <Select
+                value={appointmentForm.duration}
+                onValueChange={(value) => setAppointmentForm({ ...appointmentForm, duration: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Выберите" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="30">30 мин</SelectItem>
+                  <SelectItem value="60">1 час</SelectItem>
+                  <SelectItem value="90">1.5 часа</SelectItem>
+                  <SelectItem value="120">2 часа</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="apt-description">Описание (опционально)</Label>
+              <Input
+                id="apt-description"
+                value={appointmentForm.description}
+                onChange={(e) => setAppointmentForm({ ...appointmentForm, description: e.target.value })}
+                placeholder="Дополнительная информация..."
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAppointmentModalOpen(false)}>
+              Отмена
+            </Button>
+            <Button onClick={handleSaveAppointment} disabled={createAppointmentMutation.isPending}>
+              {createAppointmentMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Создать
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 }

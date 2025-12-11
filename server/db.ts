@@ -159,6 +159,44 @@ export async function updatePatientProfile(userId: number, data: {
   return getPatientByUserId(userId);
 }
 
+// Update patient by ID (admin)
+export async function updatePatientById(patientId: number, data: {
+  name?: string;
+  phone?: string;
+  email?: string;
+  dateOfBirth?: string;
+}) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  // Get patient to find userId for email update
+  const patientResult = await db.select().from(patients).where(eq(patients.id, patientId)).limit(1);
+  if (patientResult.length === 0) return null;
+  const patient = patientResult[0];
+  
+  const patientUpdateData: Record<string, any> = {};
+  if (data.name !== undefined) {
+    // Split name into firstName and lastName
+    const nameParts = data.name.trim().split(' ');
+    patientUpdateData.firstName = nameParts[0] || null;
+    patientUpdateData.lastName = nameParts.slice(1).join(' ') || null;
+  }
+  if (data.phone !== undefined) patientUpdateData.phone = data.phone;
+  if (data.dateOfBirth !== undefined) patientUpdateData.dateOfBirth = new Date(data.dateOfBirth);
+  
+  // Update patient table
+  if (Object.keys(patientUpdateData).length > 0) {
+    await db.update(patients).set(patientUpdateData).where(eq(patients.id, patientId));
+  }
+  
+  // Update user email if provided and userId exists
+  if (data.email !== undefined && patient.userId) {
+    await db.update(users).set({ email: data.email }).where(eq(users.id, patient.userId));
+  }
+  
+  return getPatientById(patientId);
+}
+
 // Prosthesis queries
 export async function getPatientProsthesis(userId: number) {
   const db = await getDb();
@@ -554,6 +592,13 @@ export async function getPatientById(id: number) {
   
   const patient = result[0];
   
+  // Get user data for name and email
+  let userData = null;
+  if (patient.userId) {
+    const userResult = await db.select().from(users).where(eq(users.id, patient.userId)).limit(1);
+    userData = userResult[0] || null;
+  }
+  
   // Get related data
   const [prosthesis, rehabPlan, appointmentsList] = await Promise.all([
     db.select().from(prostheses).where(eq(prostheses.patientId, id)).limit(1),
@@ -561,8 +606,13 @@ export async function getPatientById(id: number) {
     db.select().from(appointments).where(eq(appointments.patientId, id)).orderBy(desc(appointments.scheduledAt)).limit(10),
   ]);
   
+  // Combine firstName and lastName for display name
+  const displayName = [patient.firstName, patient.lastName].filter(Boolean).join(' ') || userData?.name || null;
+  
   return {
     ...patient,
+    name: displayName,
+    email: userData?.email || null,
     prosthesis: prosthesis[0] || null,
     rehabPlan: rehabPlan[0] || null,
     appointments: appointmentsList,
