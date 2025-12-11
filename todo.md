@@ -465,3 +465,21 @@
 ### Final Steps
 - [x] Verify Docker Compose configuration (Docker not available in sandbox, config files validated)
 - [x] Save checkpoint and commit
+
+
+## Screenshots and README Update - Dec 11, 2024 (Session 19)
+
+### Screenshots
+- [x] Capture patient app - Home page
+- [x] Capture patient app - Rehabilitation page
+- [x] Capture patient app - Service page
+- [x] Capture admin app - Dashboard page
+- [x] Capture admin app - Orders page
+- [x] Capture admin app - Calendar page
+- [x] Capture admin app - Analytics page
+
+### Documentation
+- [x] Update README with project description
+- [x] Add screenshots to README
+- [x] Add Docker deployment instructions
+- [x] Commit to GitHub
