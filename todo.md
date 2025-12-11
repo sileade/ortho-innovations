@@ -222,3 +222,16 @@
 ## Service Request Card Modal Fix - Dec 11, 2024
 - [x] Fix card click to open detail modal with full information
 - [x] Show status, date, time, specialist, description in modal
+
+
+## Deployment & GitHub Update - Dec 11, 2024
+- [x] Update README with latest features (service request details, deployment commands)
+- [x] Add new screenshots to README (service-request-detail.webp)
+- [ ] Commit and push to GitHub
+- [ ] Deployment testing round 1
+- [ ] Deployment testing round 2
+- [ ] Deployment testing round 3
+- [ ] Deployment testing round 4
+- [ ] Deployment testing round 5
+- [ ] Fix any errors found
+- [ ] Prepare deployment commands for test server
