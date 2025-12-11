@@ -483,3 +483,24 @@
 - [x] Add screenshots to README
 - [x] Add Docker deployment instructions
 - [x] Commit to GitHub
+
+
+## GitLab CI/CD Pipeline - Dec 11, 2024 (Session 20)
+
+### CI/CD Configuration
+- [x] Create .gitlab-ci.yml with pipeline stages (test, build, deploy)
+- [x] Configure SSH deployment to server
+- [x] Add environment variables configuration
+- [x] Create deployment script for server
+
+### Docker Compose Automation
+- [x] Update docker-compose.dev.yml for production use
+- [x] Create automated deployment script
+- [x] Add health checks and restart policies
+- [x] Configure environment variables
+
+### Server Setup Scripts
+- [x] Create initial server setup script (scripts/setup-server.sh)
+- [x] Create deployment automation script (scripts/deploy.sh)
+- [x] Add rollback capability (--rollback flag)
+- [x] Document deployment process (docs/CICD.md)
